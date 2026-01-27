@@ -2,6 +2,7 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import { conselhoTutelarRoutes } from './features/conselho-tutelar/conselho-tutelar-route';
 import { denunciaRoutes } from './features/denuncia/denuncia-route';
+import { profissaoRoutes } from './features/profissao/profissao-route';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import dbPromise from './database/db';
@@ -36,6 +37,7 @@ app.use(bodyParser.json());
 // Rotas
 app.use('/api', denunciaRoutes);
 app.use('/api', conselhoTutelarRoutes);
+app.use('/api', profissaoRoutes);
 
 async function startServer() {
   try {
