@@ -36,6 +36,15 @@ async function runMigrations(db: Database) {
         data_update DATETIME,
         data_delete DATETIME
       );
+
+      CREATE TABLE IF NOT EXISTS usuario_admin (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        usuario TEXT NOT NULL UNIQUE,
+        senha_hash TEXT NOT NULL,
+        refresh_token_hash TEXT,
+        data_criacao DATETIME DEFAULT CURRENT_TIMESTAMP,
+        data_update DATETIME
+      );
     `);
 
     const denunciasExists = await tableExists(db, 'denuncias');
