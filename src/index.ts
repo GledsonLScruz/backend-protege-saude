@@ -2,6 +2,8 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import { conselhoTutelarRoutes } from './features/conselho-tutelar/conselho-tutelar-route';
 import { denunciaRoutes } from './features/denuncia/denuncia-route';
+import { profissaoRoutes } from './features/profissao/profissao-route';
+import { authRoutes } from './features/auth/auth-route';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import dbPromise from './database/db';
@@ -14,7 +16,9 @@ const requiredEnvVars = [
   'CONSELHO_REGIAO_NORTE_EMAIL',
   'CONSELHO_REGIAO_SUL_EMAIL',
   'CONSELHO_REGIAO_LESTE_EMAIL',
-  'CONSELHO_REGIAO_OESTE_EMAIL'
+  'CONSELHO_REGIAO_OESTE_EMAIL',
+  'JWT_SECRET',
+  'JWT_REFRESH_SECRET'
 ];
 
 requiredEnvVars.forEach(envVar => {
@@ -36,6 +40,8 @@ app.use(bodyParser.json());
 // Rotas
 app.use('/api', denunciaRoutes);
 app.use('/api', conselhoTutelarRoutes);
+app.use('/api', profissaoRoutes);
+app.use('/api', authRoutes);
 
 async function startServer() {
   try {
