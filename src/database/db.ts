@@ -45,6 +45,27 @@ async function runMigrations(db: Database) {
         data_criacao DATETIME DEFAULT CURRENT_TIMESTAMP,
         data_update DATETIME
       );
+
+      CREATE TABLE IF NOT EXISTS documentos (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        profissao_id INTEGER NOT NULL,
+        titulo TEXT NOT NULL,
+        descricao TEXT,
+        pontos_foco TEXT,
+        url_online TEXT,
+        arquivo TEXT,
+        foto_capa TEXT,
+        data_criacao DATETIME DEFAULT CURRENT_TIMESTAMP,
+        data_update DATETIME,
+        FOREIGN KEY (profissao_id) REFERENCES profissao(id),
+        CHECK (
+          (url_online IS NOT NULL AND length(trim(url_online)) > 0)
+          OR (arquivo IS NOT NULL AND length(trim(arquivo)) > 0)
+        )
+      );
+
+      CREATE INDEX IF NOT EXISTS idx_documentos_profissao_id
+        ON documentos (profissao_id);
     `);
 
     const denunciasExists = await tableExists(db, 'denuncias');
