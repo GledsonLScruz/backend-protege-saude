@@ -1,7 +1,9 @@
 import express from 'express';
 import bodyParser from 'body-parser';
+import path from 'path';
 import { conselhoTutelarRoutes } from './features/conselho-tutelar/conselho-tutelar-route';
 import { denunciaRoutes } from './features/denuncia/denuncia-route';
+import { documentoRoutes } from './features/documento/documento-route';
 import { profissaoRoutes } from './features/profissao/profissao-route';
 import { authRoutes } from './features/auth/auth-route';
 import dotenv from 'dotenv';
@@ -36,11 +38,14 @@ const PORT = process.env.PORT || 8080;
 app.use(cors());
 app.use(express.urlencoded({ extended: true }));
 app.use(bodyParser.json());
+app.use('/data/documento', express.static(path.join(process.cwd(), 'data', 'documento')));
+app.use('/data/fotoDeCapa', express.static(path.join(process.cwd(), 'data', 'fotoDeCapa')));
 
 // Rotas
 app.use('/api', denunciaRoutes);
 app.use('/api', conselhoTutelarRoutes);
 app.use('/api', profissaoRoutes);
+app.use('/api', documentoRoutes);
 app.use('/api', authRoutes);
 
 async function startServer() {
