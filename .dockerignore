@@ -1,1 +1,9 @@
 data/
+node_modules/
+dist/
+.env
+.env.*
+.git
+.gitignore
+Dockerfile*
+docker-compose*.yml

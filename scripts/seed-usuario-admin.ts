@@ -1,5 +1,3 @@
-import fs from 'fs';
-import path from 'path';
 import dotenv from 'dotenv';
 import dbPromise from '../src/database/db';
 import { UsuarioAdminRepository } from '../src/features/auth/usuario-admin-repository';
@@ -12,17 +10,23 @@ type SeedUser = {
   senha: string;
 };
 
-const DEFAULT_FILE = path.join(__dirname, '../data/usuario-admin-seed.json');
+const SEED_USERS_ENV_VAR = 'USUARIO_ADMIN_SEED_JSON';
 
-function loadUsers(filePath: string): SeedUser[] {
-  if (!fs.existsSync(filePath)) {
+function loadUsersFromEnv(): SeedUser[] {
+  const envValue = process.env[SEED_USERS_ENV_VAR]?.trim();
+
+  if (!envValue) {
     throw new Error(
-      `Arquivo "${filePath}" não encontrado. Crie um JSON com [{"usuario":"admin","senha":"senhaSegura"}].`
+      `Variável ${SEED_USERS_ENV_VAR} não definida. Exemplo: [{"usuario":"admin","senha":"senhaSegura"}].`
     );
   }
 
-  const content = fs.readFileSync(filePath, 'utf-8');
-  const parsed = JSON.parse(content);
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(envValue);
+  } catch {
+    throw new Error(`Variável ${SEED_USERS_ENV_VAR} contém JSON inválido.`);
+  }
 
   if (!Array.isArray(parsed)) {
     throw new Error('O JSON precisa ser um array de objetos { usuario, senha }.');
@@ -38,13 +42,16 @@ function loadUsers(filePath: string): SeedUser[] {
 
 async function main() {
   const args = process.argv.slice(2);
-  const fileArg = args.find((a) => !a.startsWith('--'));
   const shouldUpdateExisting = args.includes('--update');
-  const filePath = fileArg ? path.resolve(process.cwd(), fileArg) : DEFAULT_FILE;
+  const unsupportedArgs = args.filter((a) => a !== '--update');
 
-  console.log(`🔎 Usando arquivo: ${filePath}`);
+  if (unsupportedArgs.length > 0) {
+    throw new Error(`Argumentos não suportados: ${unsupportedArgs.join(' ')}. Use apenas --update.`);
+  }
 
-  const users = loadUsers(filePath);
+  console.log(`🔎 Lendo usuários da variável de ambiente: ${SEED_USERS_ENV_VAR}`);
+
+  const users = loadUsersFromEnv();
   const db = await dbPromise;
   const repo = new UsuarioAdminRepository(db);
 
