@@ -6,6 +6,7 @@ import { denunciaRoutes } from './features/denuncia/denuncia-route';
 import { documentoRoutes } from './features/documento/documento-route';
 import { profissaoRoutes } from './features/profissao/profissao-route';
 import { authRoutes } from './features/auth/auth-route';
+import { seedAdminUsersFromEnv } from './features/auth/seed-admin';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import dbPromise from './database/db';
@@ -53,6 +54,20 @@ async function startServer() {
   try {
     const db = await dbPromise; 
     console.log('Banco de dados conectado e pronto.');
+
+    try {
+      const seedResult = await seedAdminUsersFromEnv({ db, requireEnv: false });
+      if (seedResult.total > 0) {
+        console.log(
+          `Seed admin concluído no startup. Criados: ${seedResult.created}. Atualizados: ${seedResult.updated}. Pulados: ${seedResult.skipped}. Total: ${seedResult.total}.`
+        );
+      } else {
+        console.log('Seed admin ignorado no startup (USUARIO_ADMIN_SEED_JSON não definido).');
+      }
+    } catch (seedError) {
+      console.error('Erro ao executar seed admin no startup:', seedError);
+      process.exit(1);
+    }
 
     app.listen(PORT, () => {
       console.log(`Servidor rodando na porta ${PORT}`);
