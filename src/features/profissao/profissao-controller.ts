@@ -13,6 +13,17 @@ export const listarProfissoes = async (_req: Request, res: Response) => {
   }
 };
 
+export const listarProfissoesPublicas = async (_req: Request, res: Response) => {
+  const service = await ProfissaoService();
+  try {
+    const profissoes = await service.listarAtivas();
+    return res.json(profissoes);
+  } catch (error) {
+    console.error('Erro ao listar profissões públicas:', error);
+    return res.status(500).json({ error: 'Erro ao listar profissões públicas' });
+  }
+};
+
 export const criarProfissao = async (req: Request, res: Response) => {
   const service = await ProfissaoService();
   try {
@@ -40,6 +51,21 @@ export const atualizarProfissao = async (req: Request, res: Response) => {
     let status = 400;
     if (message.includes('não encontrada')) status = 404;
     else if (message.includes('existe')) status = 409;
+    return res.status(status).json({ error: message });
+  }
+};
+
+export const removerProfissao = async (req: Request, res: Response) => {
+  const service = await ProfissaoService();
+  const id = Number(req.params.id);
+  if (Number.isNaN(id)) return res.status(400).json({ error: 'ID inválido' });
+
+  try {
+    await service.deletar(id);
+    return res.status(200).json({ message: 'Profissão removida com sucesso' });
+  } catch (error: any) {
+    const message = error?.message || 'Erro ao remover profissão';
+    const status = message.includes('inválido') ? 400 : message.includes('não encontrada') ? 404 : 500;
     return res.status(status).json({ error: message });
   }
 };

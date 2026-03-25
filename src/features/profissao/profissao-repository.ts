@@ -1,5 +1,6 @@
 import { Database } from 'sqlite';
 import { AtualizarProfissaoDTO, CriarProfissaoDTO, Profissao } from './@types';
+import { Documento } from '../documento/@types';
 
 export class ProfissaoRepository {
   constructor(private db: Database) {}
@@ -12,9 +13,28 @@ export class ProfissaoRepository {
     `);
   }
 
+  async listarAtivas(): Promise<Profissao[]> {
+    return this.db.all<Profissao[]>(`
+      SELECT * FROM profissao
+      WHERE data_delete IS NULL
+        AND status = 1
+      ORDER BY nome ASC
+    `);
+  }
+
   async buscarPorId(id: number): Promise<Profissao | undefined> {
     return this.db.get<Profissao>(
       `SELECT * FROM profissao WHERE id = ? AND data_delete IS NULL`,
+      id
+    );
+  }
+
+  async buscarAtivaPorId(id: number): Promise<Profissao | undefined> {
+    return this.db.get<Profissao>(
+      `SELECT * FROM profissao
+       WHERE id = ?
+         AND data_delete IS NULL
+         AND status = 1`,
       id
     );
   }
@@ -25,7 +45,7 @@ export class ProfissaoRepository {
       `INSERT INTO profissao (nome, descricao, cor, status)
        VALUES (?, ?, ?, ?)`,
       data.nome,
-      data.descricao,
+      data.descricao ?? null,
       data.cor,
       status
     );
@@ -39,7 +59,9 @@ export class ProfissaoRepository {
     if (!atual) return undefined;
 
     const nome = data.nome ?? atual.nome;
-    const descricao = data.descricao ?? atual.descricao;
+    const descricao = Object.prototype.hasOwnProperty.call(data, 'descricao')
+      ? (data.descricao ?? null)
+      : atual.descricao;
     const cor = data.cor ?? atual.cor;
     const status = data.status ?? atual.status;
 
@@ -70,5 +92,35 @@ export class ProfissaoRepository {
     );
 
     return this.buscarPorId(id);
+  }
+
+  async deletarComDependencias(id: number): Promise<Documento[]> {
+    const atual = await this.buscarPorId(id);
+    if (!atual) throw new Error('Profissão não encontrada');
+
+    await this.db.exec('BEGIN');
+
+    try {
+      const documentos = await this.db.all<Documento[]>(
+        `SELECT * FROM documentos WHERE profissao_id = ?`,
+        id
+      );
+
+      await this.db.run(
+        `UPDATE denuncias
+            SET profissao_id = NULL
+          WHERE profissao_id = ?`,
+        id
+      );
+
+      await this.db.run(`DELETE FROM documentos WHERE profissao_id = ?`, id);
+      await this.db.run(`DELETE FROM profissao WHERE id = ?`, id);
+
+      await this.db.exec('COMMIT');
+      return documentos;
+    } catch (error) {
+      await this.db.exec('ROLLBACK');
+      throw error;
+    }
   }
 }

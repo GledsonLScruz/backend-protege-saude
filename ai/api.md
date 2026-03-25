@@ -28,6 +28,12 @@
   **Validações:** `id` numérico; `status` só 0 ou 1; 404 se não encontrada; 409 se nome duplicado.  
   **Response 200:** `Profissao` atualizada.  
   **Erros:** 400 validação; 404 não encontrada; 409 duplicidade.
+- `DELETE /api/profissoes/:id`  *necessário autenticação*  
+  **Params:** `id` numérico.  
+  **Validações:** `id` obrigatório e numérico; 404 se profissão não encontrada.  
+  **Regras de negócio:** antes de remover a profissão, o backend limpa `denuncias.profissao_id` para `NULL`, remove os documentos da profissão e apaga os arquivos físicos associados. Passos e campos de formulário ligados à profissão são removidos por cascade.  
+  **Response 200:** `{ "message": "Profissão removida com sucesso" }`.  
+  **Erros:** 400 validação; 404 não encontrada; 500 falha durante a remoção.
 - `PATCH /api/profissoes/:id/status`  *necessário autenticação*  
   **Params:** `id` numérico.  
   **Request (JSON):** `{ "status": 0|1 }`  
@@ -73,7 +79,8 @@
   **Response 201:** `{ "message": "Denúncia enviada com sucesso.", "protocolo": string }`  
   **Erros:** 500 falha ao enviar/registrar denúncia.
 - `GET /api/relatorio-denuncia`  
-  **Response 200:** lista de denúncias `[{ id, protocolo, data_criacao, regiao }]` ordenada por data de criação desc.
+  **Response 200:** lista de denúncias `[{ id, protocolo, data_criacao, regiao, profissao_id? }]` ordenada por data de criação desc.  
+  **Observação:** após a exclusão de uma profissão, denúncias históricas permanecem na listagem com `profissao_id = null`.
 
 ## Conselhos Tutelares
 - `GET /api/conselhos-tutelares`  

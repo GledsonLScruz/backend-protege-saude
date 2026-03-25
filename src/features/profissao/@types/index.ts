@@ -1,7 +1,7 @@
 export type Profissao = {
   id?: number;
   nome: string;
-  descricao: string;
+  descricao?: string | null;
   cor: string;
   status: number; // 1 = ativa, 0 = desativada
   data_criacao?: string;
@@ -11,14 +11,14 @@ export type Profissao = {
 
 export type CriarProfissaoDTO = {
   nome: string;
-  descricao: string;
+  descricao?: string | null;
   cor: string;
   status?: number;
 };
 
 export type AtualizarProfissaoDTO = {
   nome?: string;
-  descricao?: string;
+  descricao?: string | null;
   cor?: string;
   status?: number;
 };

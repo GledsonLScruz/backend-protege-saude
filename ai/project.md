@@ -57,13 +57,15 @@ Nenhuma regra de negócio deve violar esses princípios.
 
   * Não aparecem para seleção no site/app
   * Não podem receber novas denúncias
-* Profissões desativadas não são excluídas fisicamente
-* O sistema utiliza soft delete (`data_delete`)
+* Desativação não exclui fisicamente a profissão
+* O sistema usa `status` para ativar/desativar a profissão
+* A exclusão administrativa é uma ação separada e remove fisicamente a profissão e seus dados dependentes configuráveis
 
 ### 3.3 Impactos
 
-* Toda denúncia sempre referencia uma profissão válida
-* Profissões com denúncias associadas nunca podem ser removidas definitivamente
+* Toda nova denúncia deve ser criada a partir de uma profissão válida e ativa
+* Ao remover uma profissão, denúncias existentes são preservadas e passam a ter `profissao_id = NULL`
+* A remoção definitiva da profissão exclui seus documentos norteadores e a configuração de formulário associada
 
 ---
 
@@ -73,6 +75,7 @@ Nenhuma regra de negócio deve violar esses princípios.
 
 * Todo documento pertence a exatamente uma profissão
 * Documentos não existem sem profissão
+* Ao excluir uma profissão, seus documentos também são removidos
 
 ### 4.2 Validações
 
@@ -108,6 +111,7 @@ Nenhuma regra de negócio deve violar esses princípios.
 * Ordem é definida por `ordem_index`
 * A ordem deve ser contínua e única por profissão
 * Um passo não pode existir sem profissão
+* Ao excluir a profissão, todos os passos são removidos automaticamente
 
 ### 5.3 Campos do Formulário
 
@@ -121,6 +125,7 @@ Nenhuma regra de negócio deve violar esses princípios.
   * Seleção múltipla
   * Data
   * Booleano
+* Ao excluir um passo, todos os campos vinculados são removidos automaticamente
 
 ### 5.4 Validações de Campos
 
@@ -190,7 +195,7 @@ A entidade Denúncia armazena apenas:
 * Protocolo (único)
 * Data de criação
 * Região
-* Profissão
+* Profissão (opcional apenas para histórico após exclusão da profissão)
 
 Nenhum dado sensível do formulário é persistido no banco.
 
@@ -206,6 +211,7 @@ Nenhum dado sensível do formulário é persistido no banco.
 * Denúncias não podem ser editadas
 * Denúncias não podem ser excluídas
 * Denúncias não possuem `data_update`
+* A exclusão de uma profissão não remove denúncias já registradas
 
 ---
 

@@ -5,12 +5,12 @@ export class DenunciaRepository {
   constructor(private db: Database) { }
 
   async criar(denuncia: Partial<EnviarDenunciaRequest>): Promise<number> {
-    const { protocolo, regiao } = denuncia;
+    const { protocolo, regiao, profissao_id } = denuncia;
 
     const result = await this.db.run(
-      `INSERT INTO denuncias (protocolo, regiao) 
-       VALUES (?, ?)`,
-      [protocolo, regiao]
+      `INSERT INTO denuncias (protocolo, regiao, profissao_id) 
+       VALUES (?, ?, ?)`,
+      [protocolo, regiao, profissao_id ?? null]
     );
 
     return result.lastID!

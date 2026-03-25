@@ -1,15 +1,20 @@
 import { AtualizarProfissaoDTO, CriarProfissaoDTO, Profissao } from './@types';
 import { ProfissaoRepository } from './profissao-repository';
 import db from '../../database/db';
+import {
+  caminhoPublicoParaAbsoluto,
+  garantirDiretoriosDocumento,
+  removerArquivoSeExistir,
+} from '../documento/documento-file-utils';
 
 export const ProfissaoService = async () => {
+  garantirDiretoriosDocumento();
   const database = await db;
   const repo = new ProfissaoRepository(database);
 
   const validarDados = (data: CriarProfissaoDTO | AtualizarProfissaoDTO, isCreate: boolean) => {
     if (isCreate) {
       if (!data.nome?.trim()) throw new Error('Nome é obrigatório');
-      if (!data.descricao?.trim()) throw new Error('Descrição é obrigatória');
       if (!data.cor?.trim()) throw new Error('Cor é obrigatória');
     }
     if (data.status !== undefined && ![0, 1].includes(data.status)) {
@@ -19,6 +24,19 @@ export const ProfissaoService = async () => {
 
   const listar = async (): Promise<Profissao[]> => {
     return repo.listar();
+  };
+
+  const listarAtivas = async (): Promise<Profissao[]> => {
+    return repo.listarAtivas();
+  };
+
+  const buscarAtivaPorId = async (id: number): Promise<Profissao> => {
+    if (!Number.isInteger(id) || id <= 0) throw new Error('ID inválido');
+
+    const profissao = await repo.buscarAtivaPorId(id);
+    if (!profissao) throw new Error('Profissão não encontrada ou inativa');
+
+    return profissao;
   };
 
   const criar = async (payload: CriarProfissaoDTO): Promise<Profissao> => {
@@ -57,10 +75,26 @@ export const ProfissaoService = async () => {
     return atualizado;
   };
 
+  const deletar = async (id: number): Promise<void> => {
+    if (!Number.isInteger(id) || id <= 0) throw new Error('ID inválido');
+
+    const documentos = await repo.deletarComDependencias(id);
+
+    await Promise.all(
+      documentos
+        .flatMap((documento) => [documento.arquivo, documento.foto_capa])
+        .filter((value): value is string => Boolean(value))
+        .map((filePath) => removerArquivoSeExistir(caminhoPublicoParaAbsoluto(filePath)))
+    );
+  };
+
   return {
     listar,
+    listarAtivas,
+    buscarAtivaPorId,
     criar,
     atualizar,
     alterarStatus,
+    deletar,
   };
 };

@@ -3,6 +3,7 @@ import { EnviarDenunciaRequest, Regiao } from './@types';
 import { DenunciaRepository } from './denuncia-repository';
 import db from '../../database/db';
 import { v4 as uuidv4 } from 'uuid';
+import { ProfissaoRepository } from '../profissao/profissao-repository';
 
 export const EMAIL_POR_REGIAO: Record<Regiao, string> = {
   [Regiao.NORTE]: process.env.CONSELHO_REGIAO_NORTE_EMAIL!,
@@ -14,6 +15,7 @@ export const EMAIL_POR_REGIAO: Record<Regiao, string> = {
 export const DenunciaService = async () => {
   const database = await db
   const denunciaRepo = new DenunciaRepository(database);
+  const profissaoRepo = new ProfissaoRepository(database);
 
   function gerarProtocolo(): string {
     const ano = new Date().getFullYear();
@@ -22,7 +24,30 @@ export const DenunciaService = async () => {
   }
 
   const enviarDenuncia = async (body: EnviarDenunciaRequest) => {
+    if (!Object.values(Regiao).includes(body.regiao)) {
+      throw new Error('Região inválida.');
+    }
+
+    if (!Number.isInteger(body.profissao_id) || body.profissao_id <= 0) {
+      throw new Error('Profissão inválida.');
+    }
+
+    const profissao = await profissaoRepo.buscarPorId(body.profissao_id);
+    if (!profissao) {
+      throw new Error('Profissão não encontrada.');
+    }
+    if (profissao.status !== 1) {
+      throw new Error('Profissão inativa.');
+    }
+
+    if (!body.pdf) {
+      throw new Error('O arquivo PDF é obrigatório.');
+    }
+
     const emailDestino = EMAIL_POR_REGIAO[body.regiao];
+    if (!emailDestino) {
+      throw new Error('Região inválida.');
+    }
 
     const protocolo = gerarProtocolo();
 
@@ -63,13 +88,14 @@ export const DenunciaService = async () => {
       const denunciaId = await denunciaRepo.criar({
         protocolo,
         regiao: body.regiao,
+        profissao_id: body.profissao_id,
       })
 
       console.log(`Email enviado: ${info.response}`);
       return { success: true, protocolo, message: 'Denúncia enviada com sucesso.' };
     } catch (error) {
       console.error('Erro ao enviar denúncia:', error);
-      throw new Error('Erro ao enviar denúncia.');
+      throw error instanceof Error ? error : new Error('Erro ao enviar denúncia.');
     }
   }
 

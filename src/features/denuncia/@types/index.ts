@@ -3,6 +3,7 @@ export interface Denuncia {
   protocolo: string;
   data_criacao?: string; // ISO date string
   regiao: string;
+  profissao_id?: number | null;
 }
 
 export enum Regiao {
@@ -13,7 +14,8 @@ export enum Regiao {
 }
 
 export interface EnviarDenunciaRequest {
-  protocolo: string
-  pdf: Express.Multer.File
-  regiao: Regiao
+  protocolo: string;
+  pdf: Express.Multer.File;
+  regiao: Regiao;
+  profissao_id: number;
 }

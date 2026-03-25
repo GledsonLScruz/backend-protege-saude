@@ -3,16 +3,13 @@ import path from 'path';
 import db from '../../database/db';
 import { AtualizarDocumentoDTO, CriarDocumentoDTO, Documento, DocumentoUploadFiles } from './@types';
 import { DocumentoRepository } from './documento-repository';
-
-const DIRETORIO_DOCUMENTO_PUBLICO = '/data/documento';
-const DIRETORIO_FOTO_CAPA_PUBLICO = '/data/fotoDeCapa';
-const DIRETORIO_DOCUMENTO_ABSOLUTO = path.join(process.cwd(), 'data', 'documento');
-const DIRETORIO_FOTO_CAPA_ABSOLUTO = path.join(process.cwd(), 'data', 'fotoDeCapa');
-
-const garantirDiretorios = () => {
-  fs.mkdirSync(DIRETORIO_DOCUMENTO_ABSOLUTO, { recursive: true });
-  fs.mkdirSync(DIRETORIO_FOTO_CAPA_ABSOLUTO, { recursive: true });
-};
+import {
+  caminhoPublicoParaAbsoluto,
+  garantirDiretoriosDocumento,
+  montarCaminhosDocumento,
+  montarCaminhosFotoCapa,
+  removerArquivoSeExistir,
+} from './documento-file-utils';
 
 const validarIdPositivo = (id: number, nomeCampo: string) => {
   if (!Number.isInteger(id) || id <= 0) {
@@ -58,51 +55,8 @@ const validarImagem = (arquivo?: Express.Multer.File) => {
   }
 };
 
-const obterExtensao = (arquivo: Express.Multer.File, extensaoPadrao: string): string => {
-  const extOriginal = path.extname(arquivo.originalname || '').toLowerCase();
-  if (extOriginal) return extOriginal;
-
-  const mimeType = (arquivo.mimetype || '').toLowerCase();
-  if (mimeType.includes('pdf')) return '.pdf';
-  if (mimeType === 'image/png') return '.png';
-  if (mimeType === 'image/jpeg') return '.jpg';
-  if (mimeType === 'image/webp') return '.webp';
-  return extensaoPadrao;
-};
-
-const montarCaminhosDocumento = (profissaoId: number, documentoId: number, arquivo: Express.Multer.File) => {
-  const extensao = obterExtensao(arquivo, '.pdf');
-  const nomeArquivo = `${profissaoId}_${documentoId}${extensao}`;
-  return {
-    caminhoPublico: `${DIRETORIO_DOCUMENTO_PUBLICO}/${nomeArquivo}`,
-    caminhoAbsoluto: path.join(DIRETORIO_DOCUMENTO_ABSOLUTO, nomeArquivo),
-  };
-};
-
-const montarCaminhosFotoCapa = (profissaoId: number, documentoId: number, arquivo: Express.Multer.File) => {
-  const extensao = obterExtensao(arquivo, '.jpg');
-  const nomeArquivo = `${profissaoId}_${documentoId}${extensao}`;
-  return {
-    caminhoPublico: `${DIRETORIO_FOTO_CAPA_PUBLICO}/${nomeArquivo}`,
-    caminhoAbsoluto: path.join(DIRETORIO_FOTO_CAPA_ABSOLUTO, nomeArquivo),
-  };
-};
-
-const caminhoPublicoParaAbsoluto = (caminhoPublico: string): string =>
-  path.join(process.cwd(), caminhoPublico.replace(/^\/+/, ''));
-
-const removerArquivoSeExistir = async (caminhoAbsoluto: string): Promise<void> => {
-  try {
-    await fs.promises.unlink(caminhoAbsoluto);
-  } catch (error: any) {
-    if (error?.code !== 'ENOENT') {
-      console.error(`Erro ao remover arquivo ${caminhoAbsoluto}:`, error);
-    }
-  }
-};
-
 export const DocumentoService = async () => {
-  garantirDiretorios();
+  garantirDiretoriosDocumento();
   const database = await db;
   const repo = new DocumentoRepository(database);
 

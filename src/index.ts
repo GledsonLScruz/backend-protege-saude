@@ -6,6 +6,7 @@ import { denunciaRoutes } from './features/denuncia/denuncia-route';
 import { documentoRoutes } from './features/documento/documento-route';
 import { profissaoRoutes } from './features/profissao/profissao-route';
 import { authRoutes } from './features/auth/auth-route';
+import { formularioRoutes } from './features/formulario/formulario-route';
 import { seedAdminUsersFromEnv } from './features/auth/seed-admin';
 import dotenv from 'dotenv';
 import cors from 'cors';
@@ -49,6 +50,7 @@ app.use('/api', conselhoTutelarRoutes);
 app.use('/api', profissaoRoutes);
 app.use('/api', documentoRoutes);
 app.use('/api', authRoutes);
+app.use('/api', formularioRoutes);
 
 async function startServer() {
   try {
