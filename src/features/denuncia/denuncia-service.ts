@@ -51,11 +51,11 @@ export const DenunciaService = async () => {
 
     const protocolo = gerarProtocolo();
 
-    const subject = 'Nova Denúncia Recebida - OdontoGuardião';
+    const subject = 'Nova Denúncia Recebida - ProtegeSaúde';
     const emailBody = `
     Prezados,
 
-    Uma nova denúncia foi registrada no sistema OdontoGuardião.
+    Uma nova denúncia foi registrada no sistema ProtegeSaúde.
 
     Protocolo: ${protocolo}
     Data: ${new Date().toLocaleDateString('pt-BR')}
@@ -64,7 +64,7 @@ export const DenunciaService = async () => {
     Esta é uma mensagem automática. Por favor, não responda a este e-mail.
 
     Atenciosamente,
-    Equipe OdontoGuardião
+    Equipe ProtegeSaúde
     `;
 
     const attachments = [];

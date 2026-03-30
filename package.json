@@ -1,5 +1,5 @@
 {
-  "name": "OdontoGuardião",
+  "name": "ProtegeSaúde",
   "version": "1.0.0",
   "description": "API para envio de denúncias ao Conselho Tutelar de Campina Grande.",
   "main": "dist/index.js",
