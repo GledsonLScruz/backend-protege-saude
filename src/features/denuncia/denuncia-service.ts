@@ -1,4 +1,4 @@
-import { transporter } from '../../integration/nodemailer';
+import { smtpConfig, transporter } from '../../integration/nodemailer';
 import { EnviarDenunciaRequest, Regiao } from './@types';
 import { DenunciaRepository } from './denuncia-repository';
 import db from '../../database/db';
@@ -118,7 +118,9 @@ function formatarErroEnvioEmail(error: unknown): Error {
 
   if (smtpError.code === 'ETIMEDOUT' && smtpError.command === 'CONN') {
     return new Error(
-      'Falha ao conectar ao servidor SMTP. Verifique SMTP_HOST/SMTP_PORT/SMTP_SECURE e se o ambiente permite saída para o provedor de e-mail.'
+      `Falha ao conectar ao servidor SMTP (${smtpConfig.host}:${smtpConfig.port}, secure=${String(
+        smtpConfig.secure
+      )}). Verifique SMTP_HOST/SMTP_PORT/SMTP_SECURE e se o ambiente permite saída para o provedor de e-mail.`
     );
   }
 

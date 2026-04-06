@@ -3,11 +3,39 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-const smtpHost = 'smtp.gmail.com';
-const smtpPort = 465;
-const smtpSecure = true;
+function parseBooleanEnv(value: string | undefined, defaultValue: boolean): boolean {
+  if (value == null || value.trim() === '') {
+    return defaultValue;
+  }
+
+  const normalizedValue = value.trim().toLowerCase();
+
+  if (['true', '1', 'yes', 'y', 'on'].includes(normalizedValue)) {
+    return true;
+  }
+
+  if (['false', '0', 'no', 'n', 'off'].includes(normalizedValue)) {
+    return false;
+  }
+
+  throw new Error(`Configuração de e-mail inválida: valor booleano inválido para SMTP_SECURE: ${value}`);
+}
+
+const smtpHost = (process.env.SMTP_HOST || 'smtp.gmail.com').trim();
+const smtpPort = Number(process.env.SMTP_PORT || 465);
+const smtpSecure = parseBooleanEnv(process.env.SMTP_SECURE, smtpPort === 465);
+
+export const smtpConfig = {
+  host: smtpHost,
+  port: smtpPort,
+  secure: smtpSecure,
+};
 
 function assertMailConfig() {
+  if (!smtpHost) {
+    throw new Error('Configuração de e-mail inválida: SMTP_HOST não definido.');
+  }
+
   if (!process.env.ODONTO_GUARDIAO_EMAIL?.trim()) {
     throw new Error('Configuração de e-mail inválida: ODONTO_GUARDIAO_EMAIL não definido.');
   }

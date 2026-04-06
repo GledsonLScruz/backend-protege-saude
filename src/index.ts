@@ -26,11 +26,23 @@ const requiredEnvVars = [
   'JWT_REFRESH_SECRET'
 ];
 
+const optionalEnvVars = [
+  'SMTP_HOST',
+  'SMTP_PORT',
+  'SMTP_SECURE'
+];
+
 requiredEnvVars.forEach(envVar => {
   if (!process.env[envVar]) {
     console.error(`❌ Variável de ambiente obrigatória faltando: ${envVar}`);
   } else {
     console.log(`✅ ${envVar}: [DEFINIDO (oculto)]`);
+  }
+});
+
+optionalEnvVars.forEach(envVar => {
+  if (process.env[envVar]) {
+    console.log(`✅ ${envVar}: [DEFINIDO]`);
   }
 });
 
