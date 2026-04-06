@@ -95,7 +95,7 @@ export const DenunciaService = async () => {
       return { success: true, protocolo, message: 'Denúncia enviada com sucesso.' };
     } catch (error) {
       console.error('Erro ao enviar denúncia:', error);
-      throw error instanceof Error ? error : new Error('Erro ao enviar denúncia.');
+      throw formatarErroEnvioEmail(error);
     }
   }
 
@@ -107,4 +107,24 @@ export const DenunciaService = async () => {
     enviarDenuncia,
     listaTodasDenuncias
   }
+}
+
+function formatarErroEnvioEmail(error: unknown): Error {
+  if (!(error instanceof Error)) {
+    return new Error('Erro ao enviar denúncia.');
+  }
+
+  const smtpError = error as Error & { code?: string; command?: string };
+
+  if (smtpError.code === 'ETIMEDOUT' && smtpError.command === 'CONN') {
+    return new Error(
+      'Falha ao conectar ao servidor SMTP. Verifique SMTP_HOST/SMTP_PORT/SMTP_SECURE e se o ambiente permite saída para o provedor de e-mail.'
+    );
+  }
+
+  if (smtpError.code === 'EAUTH') {
+    return new Error('Falha de autenticação no servidor SMTP. Verifique ODONTO_GUARDIAO_EMAIL e ODONTO_GUARDIAO_PWD.');
+  }
+
+  return error;
 }
