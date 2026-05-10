@@ -1,7 +1,13 @@
 import fs from 'fs';
 import path from 'path';
 import db from '../../database/db';
-import { AtualizarDocumentoDTO, CriarDocumentoDTO, Documento, DocumentoUploadFiles } from './@types';
+import {
+  AtualizarDocumentoDTO,
+  CriarDocumentoDTO,
+  Documento,
+  DocumentoUploadFiles,
+  ReorderDocumentoDTO,
+} from './@types';
 import { DocumentoRepository } from './documento-repository';
 import {
   caminhoPublicoParaAbsoluto,
@@ -13,6 +19,12 @@ import {
 
 const validarIdPositivo = (id: number, nomeCampo: string) => {
   if (!Number.isInteger(id) || id <= 0) {
+    throw new Error(`${nomeCampo} inválido`);
+  }
+};
+
+const validarOrdemIndex = (ordemIndex: number, nomeCampo = 'ordem_index') => {
+  if (!Number.isInteger(ordemIndex) || ordemIndex <= 0) {
     throw new Error(`${nomeCampo} inválido`);
   }
 };
@@ -52,6 +64,33 @@ const validarImagem = (arquivo?: Express.Multer.File) => {
   const mimeType = (arquivo.mimetype || '').toLowerCase();
   if (!mimeType.startsWith('image/')) {
     throw new Error('Foto de capa deve ser uma imagem válida');
+  }
+};
+
+const normalizarItensReorder = (itens: { id: number; ordem_index: number }[]) => {
+  if (!Array.isArray(itens) || itens.length === 0) {
+    throw new Error('itens de reorder é obrigatório');
+  }
+
+  const ids = new Set<number>();
+  const ordens = new Set<number>();
+
+  for (const item of itens) {
+    validarIdPositivo(item.id, 'id');
+    validarOrdemIndex(item.ordem_index);
+
+    if (ids.has(item.id)) throw new Error('itens possui id duplicado');
+    if (ordens.has(item.ordem_index)) throw new Error('itens possui ordem_index duplicado');
+
+    ids.add(item.id);
+    ordens.add(item.ordem_index);
+  }
+
+  const ordenadas = [...ordens].sort((a, b) => a - b);
+  for (let i = 0; i < ordenadas.length; i += 1) {
+    if (ordenadas[i] !== i + 1) {
+      throw new Error('ordem_index deve ser sequencial iniciando em 1');
+    }
   }
 };
 
@@ -95,8 +134,17 @@ export const DocumentoService = async () => {
       throw new Error('Informe url_online ou arquivo PDF');
     }
 
+    const ordemIndex = payload.ordem_index ?? (await repo.proximaOrdem(payload.profissao_id));
+    validarOrdemIndex(ordemIndex);
+
+    const ordemEmUso = await repo.existeNaOrdem(payload.profissao_id, ordemIndex);
+    if (ordemEmUso) {
+      throw new Error('ordem_index já utilizado para essa profissão');
+    }
+
     let documento = await repo.criar({
       profissao_id: payload.profissao_id,
+      ordem_index: ordemIndex,
       titulo,
       descricao: paraTextoOpcionalNulo(payload.descricao),
       pontos_foco: paraTextoOpcionalNulo(payload.pontos_foco),
@@ -129,6 +177,7 @@ export const DocumentoService = async () => {
 
       const atualizado = await repo.atualizar(documento.id, {
         profissao_id: payload.profissao_id,
+        ordem_index: ordemIndex,
         titulo,
         descricao: paraTextoOpcionalNulo(payload.descricao),
         pontos_foco: paraTextoOpcionalNulo(payload.pontos_foco),
@@ -167,6 +216,15 @@ export const DocumentoService = async () => {
 
     const titulo = payload.titulo !== undefined ? payload.titulo.trim() : atual.titulo;
     if (!titulo) throw new Error('Título é obrigatório');
+
+    const mudouProfissao = profissaoId !== atual.profissao_id;
+    const ordemIndex = payload.ordem_index ?? (mudouProfissao ? await repo.proximaOrdem(profissaoId) : atual.ordem_index);
+    validarOrdemIndex(ordemIndex);
+
+    const ordemEmUso = await repo.existeNaOrdem(profissaoId, ordemIndex, id);
+    if (ordemEmUso) {
+      throw new Error('ordem_index já utilizado para essa profissão');
+    }
 
     const descricao =
       payload.descricao !== undefined
@@ -235,6 +293,7 @@ export const DocumentoService = async () => {
 
       const atualizado = await repo.atualizar(id, {
         profissao_id: profissaoId,
+        ordem_index: ordemIndex,
         titulo,
         descricao,
         pontos_foco: pontosFoco,
@@ -274,11 +333,31 @@ export const DocumentoService = async () => {
     );
   };
 
+  const reorder = async (payload: ReorderDocumentoDTO): Promise<Documento[]> => {
+    validarIdPositivo(payload.profissao_id, 'Profissão');
+    normalizarItensReorder(payload.itens);
+
+    const profissaoExiste = await repo.profissaoExiste(payload.profissao_id);
+    if (!profissaoExiste) throw new Error('Profissão não encontrada');
+
+    const documentosAtuais = await repo.listarPorProfissao(payload.profissao_id);
+    const idsAtuais = documentosAtuais.map((documento) => documento.id!);
+    const idsPayload = payload.itens.map((item) => item.id);
+
+    if (idsAtuais.length !== idsPayload.length || idsPayload.some((id) => !idsAtuais.includes(id))) {
+      throw new Error('Reorder deve incluir todos os documentos da profissão e apenas eles');
+    }
+
+    await repo.reorder(payload.profissao_id, payload.itens);
+    return repo.listarPorProfissao(payload.profissao_id);
+  };
+
   return {
     listarPorProfissao,
     buscarPorId,
     criar,
     atualizar,
     deletar,
+    reorder,
   };
 };

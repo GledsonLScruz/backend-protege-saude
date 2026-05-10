@@ -76,10 +76,13 @@ Nenhuma regra de negócio deve violar esses princípios.
 * Todo documento pertence a exatamente uma profissão
 * Documentos não existem sem profissão
 * Ao excluir uma profissão, seus documentos também são removidos
+* Ordem é definida por `ordem_index`
+* A ordem deve ser contínua e única por profissão
 
 ### 4.2 Validações
 
 * Título é obrigatório
+* `ordem_index`, quando informado, deve ser inteiro positivo e não pode repetir dentro da profissão
 * Pelo menos um meio de acesso deve existir:
 
   * URL online ou arquivo para download
@@ -91,6 +94,7 @@ Nenhuma regra de negócio deve violar esses princípios.
 ### 4.3 Exibição
 
 * Apenas documentos da profissão selecionada são exibidos
+* Documentos são exibidos em ordem crescente de `ordem_index`
 * Documentos não influenciam o fluxo de denúncia
 
 ---

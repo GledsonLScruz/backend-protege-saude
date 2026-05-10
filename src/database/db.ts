@@ -91,6 +91,7 @@ async function runMigrations(db: Database) {
       CREATE TABLE IF NOT EXISTS documentos (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         profissao_id INTEGER NOT NULL,
+        ordem_index INTEGER NOT NULL,
         titulo TEXT NOT NULL,
         descricao TEXT,
         pontos_foco TEXT,
@@ -103,7 +104,8 @@ async function runMigrations(db: Database) {
         CHECK (
           (url_online IS NOT NULL AND length(trim(url_online)) > 0)
           OR (arquivo IS NOT NULL AND length(trim(arquivo)) > 0)
-        )
+        ),
+        UNIQUE (profissao_id, ordem_index)
       );
 
       CREATE INDEX IF NOT EXISTS idx_documentos_profissao_id
@@ -227,12 +229,17 @@ async function runMigrations(db: Database) {
     const documentoFkCascade =
       documentosExists &&
       await foreignKeyUsesOnDelete(db, 'documentos', 'profissao_id', 'profissao', 'CASCADE');
+    const documentoTemOrdem = documentosExists && await columnExists(db, 'documentos', 'ordem_index');
+    const documentoTemUniqueOrdem =
+      documentosExists &&
+      await sqlContains(db, 'documentos', 'UNIQUE (profissao_id, ordem_index)');
 
-    if (documentosExists && !documentoFkCascade) {
+    if (documentosExists && (!documentoFkCascade || !documentoTemOrdem || !documentoTemUniqueOrdem)) {
       await db.exec(`
         CREATE TABLE IF NOT EXISTS documentos_new (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
           profissao_id INTEGER NOT NULL,
+          ordem_index INTEGER NOT NULL,
           titulo TEXT NOT NULL,
           descricao TEXT,
           pontos_foco TEXT,
@@ -245,11 +252,40 @@ async function runMigrations(db: Database) {
           CHECK (
             (url_online IS NOT NULL AND length(trim(url_online)) > 0)
             OR (arquivo IS NOT NULL AND length(trim(arquivo)) > 0)
-          )
+          ),
+          UNIQUE (profissao_id, ordem_index)
         );
 
-        INSERT INTO documentos_new (id, profissao_id, titulo, descricao, pontos_foco, url_online, arquivo, foto_capa, data_criacao, data_update)
-        SELECT id, profissao_id, titulo, descricao, pontos_foco, url_online, arquivo, foto_capa, data_criacao, data_update
+        INSERT INTO documentos_new (
+          id,
+          profissao_id,
+          ordem_index,
+          titulo,
+          descricao,
+          pontos_foco,
+          url_online,
+          arquivo,
+          foto_capa,
+          data_criacao,
+          data_update
+        )
+        SELECT
+          id,
+          profissao_id,
+          ${documentoTemOrdem && documentoTemUniqueOrdem
+            ? 'ordem_index'
+            : `ROW_NUMBER() OVER (
+              PARTITION BY profissao_id
+              ORDER BY ${documentoTemOrdem ? 'ordem_index ASC,' : 'data_criacao DESC,'} id ASC
+            )`},
+          titulo,
+          descricao,
+          pontos_foco,
+          url_online,
+          arquivo,
+          foto_capa,
+          data_criacao,
+          data_update
           FROM documentos;
 
         DROP TABLE documentos;
@@ -257,8 +293,19 @@ async function runMigrations(db: Database) {
 
         CREATE INDEX IF NOT EXISTS idx_documentos_profissao_id
           ON documentos (profissao_id);
+
+        CREATE INDEX IF NOT EXISTS idx_documentos_profissao_ordem
+          ON documentos (profissao_id, ordem_index);
       `);
     }
+
+    await db.exec(`
+      CREATE INDEX IF NOT EXISTS idx_documentos_profissao_id
+        ON documentos (profissao_id);
+
+      CREATE INDEX IF NOT EXISTS idx_documentos_profissao_ordem
+        ON documentos (profissao_id, ordem_index);
+    `);
 
     const formularioCampoExists = await tableExists(db, 'formulario_campo');
     const formularioCampoConstraintFragment = `tipo_campo IN (${FORMULARIO_CAMPO_TIPOS_SQL})`;

@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { DocumentoUploadFiles } from './@types';
-import { AtualizarDocumentoRequest, CriarDocumentoRequest } from './dto';
+import { AtualizarDocumentoRequest, CriarDocumentoRequest, ReorderDocumentoRequest } from './dto';
 import { DocumentoService } from './documento-service';
 
 const extrairArquivos = (req: Request): DocumentoUploadFiles => {
@@ -22,9 +22,18 @@ const extrairArquivos = (req: Request): DocumentoUploadFiles => {
 
 const statusPorErro = (message: string): number => {
   if (message.includes('não encontrada') || message.includes('não encontrado')) return 404;
+  if (message.includes('já utilizado') || message.includes('duplicado')) return 409;
   if (message.includes('não é possível')) return 400;
   if (message.includes('PDF') || message.includes('imagem')) return 415;
-  if (message.includes('inválid') || message.includes('obrigatório') || message.includes('Informe')) return 400;
+  if (
+    message.includes('inválid') ||
+    message.includes('obrigatório') ||
+    message.includes('Informe') ||
+    message.includes('sequencial') ||
+    message.includes('incluir todos')
+  ) {
+    return 400;
+  }
   return 500;
 };
 
@@ -108,6 +117,19 @@ export const removerDocumento = async (req: Request, res: Response) => {
     return res.status(200).json({ message: 'Documento removido com sucesso' });
   } catch (error: any) {
     const message = error?.message || 'Erro ao remover documento';
+    return res.status(statusPorErro(message)).json({ error: message });
+  }
+};
+
+export const reorderDocumentos = async (req: Request, res: Response) => {
+  const service = await DocumentoService();
+
+  try {
+    const dto = ReorderDocumentoRequest.from(req.body);
+    const documentos = await service.reorder(dto);
+    return res.status(200).json(documentos);
+  } catch (error: any) {
+    const message = error?.message || 'Erro ao reordenar documentos';
     return res.status(statusPorErro(message)).json({ error: message });
   }
 };

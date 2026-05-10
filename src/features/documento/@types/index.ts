@@ -1,6 +1,7 @@
 export type Documento = {
   id?: number;
   profissao_id: number;
+  ordem_index: number;
   titulo: string;
   descricao?: string | null;
   pontos_foco?: string | null;
@@ -13,6 +14,7 @@ export type Documento = {
 
 export type CriarDocumentoDTO = {
   profissao_id: number;
+  ordem_index?: number;
   titulo: string;
   descricao?: string;
   pontos_foco?: string;
@@ -21,6 +23,7 @@ export type CriarDocumentoDTO = {
 
 export type AtualizarDocumentoDTO = {
   profissao_id?: number;
+  ordem_index?: number;
   titulo?: string;
   descricao?: string;
   pontos_foco?: string;
@@ -32,4 +35,14 @@ export type AtualizarDocumentoDTO = {
 export type DocumentoUploadFiles = {
   arquivo?: Express.Multer.File;
   foto_capa?: Express.Multer.File;
+};
+
+export type ReorderDocumentoItemDTO = {
+  id: number;
+  ordem_index: number;
+};
+
+export type ReorderDocumentoDTO = {
+  profissao_id: number;
+  itens: ReorderDocumentoItemDTO[];
 };

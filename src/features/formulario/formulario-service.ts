@@ -13,9 +13,10 @@ import {
   ReorderFormularioCampoDTO,
   ReorderFormularioPassoDTO,
   TIPO_CAMPO_ACEITA_OPCOES,
+  TIPO_CAMPO_MODO_OPCOES,
   TIPO_CAMPO_TEM_OPCOES_PADRAO_NAO_EDITAVEIS,
   TIPOS_CAMPO,
-  TIPOS_CAMPO_COM_OPCOES,
+  TIPOS_CAMPO_COM_OPCOES_OBRIGATORIAS,
   TIPOS_CAMPO_LABELS,
   TipoCampo,
   TipoCampoOpcao,
@@ -79,15 +80,24 @@ const normalizarMaxFotos = (maxFotos: unknown): number | null => {
 };
 
 const validarRegraOpcoes = (tipoCampo: TipoCampo, opcoes: OpcaoCampo[] | null) => {
-  if (TIPOS_CAMPO_COM_OPCOES.includes(tipoCampo)) {
+  if (TIPOS_CAMPO_COM_OPCOES_OBRIGATORIAS.includes(tipoCampo)) {
     if (!opcoes?.length) {
       throw new Error(`opcoes é obrigatória para tipo_campo ${tipoCampo}`);
     }
     return;
   }
 
-  if (opcoes?.length) {
-    throw new Error(`opcoes só é permitida para tipo_campo ${TIPOS_CAMPO_COM_OPCOES.join(', ')}`);
+  if (tipoCampo === 'switch') {
+    if (opcoes !== null && opcoes.length === 0) {
+      throw new Error('opcoes deve conter ao menos um item para tipo_campo switch');
+    }
+    return;
+  }
+
+  if (opcoes !== null) {
+    throw new Error(
+      `opcoes só é permitida para tipo_campo ${[...TIPOS_CAMPO_COM_OPCOES_OBRIGATORIAS, 'switch'].join(', ')}`
+    );
   }
 };
 
@@ -106,11 +116,18 @@ const validarRegraMaxFotos = (tipoCampo: TipoCampo, maxFotos: number | null) => 
 
 const montarValidacoesCampo = (campo: FormularioCampo): FormularioCampoValidacoes => {
   const opcoesPermitidas = campo.opcoes?.map((opcao) => opcao.valor);
+  const switchComOpcoesCondicionais = campo.tipo_campo === 'switch' && Boolean(opcoesPermitidas?.length);
 
   return {
     obrigatorio: campo.obrigatorio,
     aceita_multiplos: campo.tipo_campo === 'checkbox' || campo.tipo_campo === 'foto',
-    opcoes_permitidas: opcoesPermitidas?.length ? opcoesPermitidas : undefined,
+    opcoes_permitidas:
+      campo.tipo_campo === 'select' || campo.tipo_campo === 'radio' || campo.tipo_campo === 'checkbox'
+        ? (opcoesPermitidas?.length ? opcoesPermitidas : undefined)
+        : undefined,
+    opcoes_condicionais_quando: switchComOpcoesCondicionais ? 'sim' : undefined,
+    opcoes_condicionais_permitidas: switchComOpcoesCondicionais ? opcoesPermitidas : undefined,
+    opcoes_condicionais_aceita_multiplos: switchComOpcoesCondicionais ? true : undefined,
     max_fotos: campo.tipo_campo === 'foto' ? (campo.max_fotos ?? null) : null,
   };
 };
@@ -257,6 +274,7 @@ export const FormularioService = async () => {
       valor: tipo,
       label: TIPOS_CAMPO_LABELS[tipo],
       aceita_opcoes: TIPO_CAMPO_ACEITA_OPCOES[tipo],
+      modo_opcoes: TIPO_CAMPO_MODO_OPCOES[tipo],
       tem_opcoes_padrao_nao_editaveis: TIPO_CAMPO_TEM_OPCOES_PADRAO_NAO_EDITAVEIS[tipo],
     }));
 

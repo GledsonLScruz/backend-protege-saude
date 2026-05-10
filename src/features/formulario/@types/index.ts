@@ -24,18 +24,32 @@ export const TIPOS_CAMPO_LABELS: Record<TipoCampo, string> = {
   foto: 'Foto',
 };
 
-export const TIPOS_CAMPO_COM_OPCOES: TipoCampo[] = ['select', 'radio', 'checkbox'];
+export type ModoOpcoesCampo = 'sempre' | 'quando_sim' | 'nao_se_aplica';
+
+export const TIPOS_CAMPO_COM_OPCOES_OBRIGATORIAS: TipoCampo[] = ['select', 'radio', 'checkbox'];
 
 export const TIPO_CAMPO_ACEITA_OPCOES: Record<TipoCampo, boolean> = {
   texto: false,
   textarea: false,
   numero: false,
   data: false,
-  switch: false,
+  switch: true,
   select: true,
   radio: true,
   checkbox: true,
   foto: false,
+};
+
+export const TIPO_CAMPO_MODO_OPCOES: Record<TipoCampo, ModoOpcoesCampo> = {
+  texto: 'nao_se_aplica',
+  textarea: 'nao_se_aplica',
+  numero: 'nao_se_aplica',
+  data: 'nao_se_aplica',
+  switch: 'quando_sim',
+  select: 'sempre',
+  radio: 'sempre',
+  checkbox: 'sempre',
+  foto: 'nao_se_aplica',
 };
 
 export const TIPO_CAMPO_TEM_OPCOES_PADRAO_NAO_EDITAVEIS: Record<TipoCampo, boolean> = {
@@ -54,6 +68,7 @@ export type TipoCampoOpcao = {
   valor: TipoCampo;
   label: string;
   aceita_opcoes: boolean;
+  modo_opcoes: ModoOpcoesCampo;
   tem_opcoes_padrao_nao_editaveis: boolean;
 };
 
@@ -61,6 +76,9 @@ export type FormularioCampoValidacoes = {
   obrigatorio: boolean;
   aceita_multiplos: boolean;
   opcoes_permitidas?: string[];
+  opcoes_condicionais_quando?: 'sim';
+  opcoes_condicionais_permitidas?: string[];
+  opcoes_condicionais_aceita_multiplos?: true;
   max_fotos?: number | null;
 };
 
@@ -110,6 +128,7 @@ export type FormularioCampo = {
   tipo_campo: TipoCampo;
   tipo_campo_label?: string;
   tipo_campo_aceita_opcoes?: boolean;
+  tipo_campo_modo_opcoes?: ModoOpcoesCampo;
   tipo_campo_tem_opcoes_padrao_nao_editaveis?: boolean;
   opcoes?: OpcaoCampo[] | null;
   max_fotos?: number | null;

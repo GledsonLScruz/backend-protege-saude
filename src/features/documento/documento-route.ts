@@ -7,6 +7,7 @@ import {
   criarDocumento,
   listarDocumentosPorProfissao,
   removerDocumento,
+  reorderDocumentos,
 } from './documento-controller';
 
 const router = Router();
@@ -19,8 +20,8 @@ const uploadDocumentoArquivos = upload.fields([
 router.get('/profissoes/:profissaoId/documentos', listarDocumentosPorProfissao);
 router.get('/documentos/:id', buscarDocumentoPorId);
 router.post('/documentos', autenticarJWT, uploadDocumentoArquivos, criarDocumento);
+router.patch('/documentos/reorder', autenticarJWT, reorderDocumentos);
 router.put('/documentos/:id', autenticarJWT, uploadDocumentoArquivos, atualizarDocumento);
 router.delete('/documentos/:id', autenticarJWT, removerDocumento);
 
 export { router as documentoRoutes };
-

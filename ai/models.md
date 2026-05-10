@@ -32,6 +32,7 @@
 ## documentos
 - `id` INTEGER PK AUTOINCREMENT
 - `profissao_id` INTEGER NOT NULL (FK `profissao.id`, `ON DELETE CASCADE`)
+- `ordem_index` INTEGER NOT NULL
 - `titulo` TEXT NOT NULL
 - `descricao` TEXT
 - `pontos_foco` TEXT
@@ -41,7 +42,11 @@
 - `data_criacao` DATETIME DEFAULT CURRENT_TIMESTAMP
 - `data_update` DATETIME
 - Regra de negócio: deve existir pelo menos um meio de acesso (`url_online` ou `arquivo`)
+- Regra de ordenação: `ordem_index` define a ordem de exibição, deve ser contínuo e único por profissão
 - Regra de exclusão: ao excluir a profissão, os registros de documentos são removidos e os arquivos físicos vinculados também devem ser apagados do servidor
+- Índice/constraint:
+  - `UNIQUE (profissao_id, ordem_index)`
+  - `idx_documentos_profissao_ordem (profissao_id, ordem_index)`
 - Padrão de armazenamento:
   - Documento: `/data/documento/<profissaoId>_<documentoId>.<ext>`
   - Foto de capa: `/data/fotoDeCapa/<profissaoId>_<documentoId>.<ext>`
@@ -69,9 +74,16 @@
 - `data_criacao` DATETIME DEFAULT CURRENT_TIMESTAMP
 - `data_update` DATETIME
 - Regra de integridade: ao excluir um passo, todos os campos vinculados são removidos
-- Regra de dominio: `opcoes` so e permitida para `select`, `radio` e `checkbox`
+- Regra de dominio: `opcoes` e obrigatoria para `select`, `radio` e `checkbox`
+- Regra de dominio: `switch` pode reutilizar `opcoes` de forma opcional; quando presentes, representam uma lista condicional de multipla selecao exibida apenas se a resposta booleana for `sim`
+- Regra de dominio: `switch` com `opcoes` deve receber array nao vazio
+- Regra de dominio: `opcoes` e proibida para os demais tipos
 - Regra de dominio: `max_fotos` e obrigatorio apenas para `tipo_campo = foto`, deve ser inteiro entre `1` e `5` e e proibido para os demais tipos
 - Metadado derivado de tipo: `bairro` possui opcoes padrao de dominio e elas nao sao editaveis manualmente no admin
+- Metadado derivado de tipo publicado pela API:
+  - `modo_opcoes = sempre` para `select`, `radio`, `checkbox`
+  - `modo_opcoes = quando_sim` para `switch`
+  - `modo_opcoes = nao_se_aplica` para os demais tipos
 - Regra de privacidade futura: fotos de denuncias anonimas nao podem ser persistidas em banco nem em disco; quando esse fluxo existir, elas so poderao permanecer em memoria durante a geracao do PDF enviado por email
 
 ## conselho_tutelar (carga estática em JSON)
@@ -90,6 +102,7 @@
   - Alterar status: `status` (0/1)
   - Remover: `DELETE /api/profissoes/:id`
 - DTOs de documento:
-  - Criar (multipart/form-data): `profissao_id`, `titulo`, `descricao?`, `pontos_foco?`, `url_online?`, `arquivo?`, `foto_capa?`
-  - Atualizar (multipart/form-data): `profissao_id?`, `titulo?`, `descricao?`, `pontos_foco?`, `url_online?`, `arquivo?`, `foto_capa?`
+  - Criar (multipart/form-data): `profissao_id`, `ordem_index?`, `titulo`, `descricao?`, `pontos_foco?`, `url_online?`, `arquivo?`, `foto_capa?`
+  - Atualizar (multipart/form-data): `profissao_id?`, `ordem_index?`, `titulo?`, `descricao?`, `pontos_foco?`, `url_online?`, `arquivo?`, `foto_capa?`
+  - Reordenar (JSON): `profissao_id`, `itens: [{ id, ordem_index }]`
 - Login: `usuario`, `senha`
