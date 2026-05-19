@@ -1,16 +1,23 @@
 import { Router } from 'express';
-import { ConselhoTutelarController } from './conselho-tutelar-controller';
-import { ConselhoTutelarService } from './conselho-tutelar-service';
-import { ConselhoTutelarRepository } from './conselho-tutelar-repository';
+import { autenticarJWT } from '../auth/auth-middleware';
+import {
+  atualizarConselhoTutelar,
+  buscarConselhoTutelarPorCidade,
+  buscarConselhoTutelarPorId,
+  criarConselhoTutelar,
+  listarConselhosTutelares,
+  pesquisarConselhosTutelares,
+  removerConselhoTutelar,
+} from './conselho-tutelar-controller';
 
 const router = Router();
-const repository = new ConselhoTutelarRepository();
-const service = new ConselhoTutelarService(repository);
-const controller = new ConselhoTutelarController(service);
 
-router.get('/conselhos-tutelares', (req, res) => controller.getAll(req, res));
-router.get('/conselhos-tutelares/search', (req, res) => controller.search(req, res));
-router.get('/conselhos-tutelares/:id', (req, res) => controller.getById(req, res));
-router.get('/conselhos-tutelares/cidade/:cidade', (req, res) => controller.getByCidade(req, res));
+router.get('/conselhos-tutelares', listarConselhosTutelares);
+router.get('/conselhos-tutelares/search', pesquisarConselhosTutelares);
+router.post('/conselhos-tutelares', autenticarJWT, criarConselhoTutelar);
+router.put('/conselhos-tutelares/:id', autenticarJWT, atualizarConselhoTutelar);
+router.delete('/conselhos-tutelares/:id', autenticarJWT, removerConselhoTutelar);
+router.get('/conselhos-tutelares/cidade/:cidade', buscarConselhoTutelarPorCidade);
+router.get('/conselhos-tutelares/:id', buscarConselhoTutelarPorId);
 
 export { router as conselhoTutelarRoutes };

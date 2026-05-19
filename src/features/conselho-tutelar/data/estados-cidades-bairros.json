@@ -1,0 +1,1146 @@
+{
+    "PB": {
+        "Água Branca": [
+            "Centro"
+        ],
+        "Aguiar": [
+            "Centro"
+        ],
+        "Alagoa Grande": [
+            "Centro",
+            "Povoado"
+        ],
+        "Alagoa Nova": [
+            "Centro"
+        ],
+        "Alagoinha": [
+            "Centro"
+        ],
+        "Alcantil": [
+            "Centro",
+            "Povoado"
+        ],
+        "Algodão de Jandaíra": [
+            "Centro"
+        ],
+        "Alhandra": [
+            "Centro",
+            "Povoado"
+        ],
+        "Amparo": [
+            "Centro"
+        ],
+        "Aparecida": [
+            "Centro"
+        ],
+        "Araçagi": [
+            "Centro",
+            "Povoado"
+        ],
+        "Arara": [
+            "Centro"
+        ],
+        "Araruna": [
+            "Centro"
+        ],
+        "Areia": [
+            "Centro",
+            "Cepilho",
+            "Mata Limpa",
+            "Muquém",
+            "Usina Santa Maria"
+        ],
+        "Areia de Baraúnas": [
+            "Centro"
+        ],
+        "Areial": [
+            "Centro"
+        ],
+        "Aroeiras": [
+            "Centro",
+            "Pedro Velho"
+        ],
+        "Assunção": [
+            "Centro"
+        ],
+        "Baía da Traição": [
+            "Centro"
+        ],
+        "Bananeiras": [
+            "Centro",
+            "Maia",
+            "Povoado",
+            "Taboleiro",
+            "Vila Maia"
+        ],
+        "Baraúna": [
+            "Centro"
+        ],
+        "Barra de Santa Rosa": [
+            "Centro"
+        ],
+        "Barra de Santana": [
+            "Centro",
+            "Povoado"
+        ],
+        "Barra de São Miguel": [
+            "Centro"
+        ],
+        "Bayeux": [
+            "Alto da Boa Vista",
+            "Área Rural de Bayeux",
+            "Baralho",
+            "Brasília",
+            "Centro",
+            "Comercial Norte",
+            "Imaculada",
+            "Jardim Aeroporto",
+            "Jardim São Severino",
+            "Jardim São Vicente",
+            "Mário Andreazza",
+            "Rio do Meio",
+            "São Bento",
+            "Sesi",
+            "Tambay"
+        ],
+        "Belém": [
+            "Centro",
+            "Rua Nova"
+        ],
+        "Belém do Brejo do Cruz": [
+            "Centro"
+        ],
+        "Bernardino Batista": [
+            "Centro"
+        ],
+        "Boa Ventura": [
+            "Centro"
+        ],
+        "Boa Vista": [
+            "Centro"
+        ],
+        "Bom Jesus": [
+            "Centro"
+        ],
+        "Bom Sucesso": [
+            "Centro"
+        ],
+        "Bonito de Santa Fé": [
+            "Centro",
+            "Viana"
+        ],
+        "Boqueirão": [
+            "Centro",
+            "Marinho",
+            "Povoado"
+        ],
+        "Borborema": [
+            "Centro"
+        ],
+        "Brejo do Cruz": [
+            "Centro"
+        ],
+        "Brejo dos Santos": [
+            "Centro"
+        ],
+        "Caaporã": [
+            "Centro",
+            "Cupissura"
+        ],
+        "Cabaceiras": [
+            "Centro"
+        ],
+        "Cabedelo": [
+            "Amazônia Park",
+            "Área Rural de Cabedelo",
+            "Areia Dourada",
+            "Camalaú",
+            "Camboinha",
+            "Centro",
+            "Formosa",
+            "Ilha da Restinga",
+            "Intermares",
+            "Jacaré",
+            "Jardim América",
+            "Jardim Brasília",
+            "Jardim Camboinha",
+            "Jardim Manguinhos",
+            "Monte Castelo",
+            "Morada Nova",
+            "Parque Esperança",
+            "Parque Verde",
+            "Poço",
+            "Ponta de Campina",
+            "Ponta de Matos",
+            "Portal do Poço",
+            "Recanto do Poço",
+            "Renascer",
+            "Salinas",
+            "Salinas de Ribamar",
+            "Santa Catarina"
+        ],
+        "Cachoeira dos Índios": [
+            "Balanços",
+            "Centro",
+            "Fátima",
+            "São José das Marimbas",
+            "São José de Marimbas"
+        ],
+        "Cacimba de Areia": [
+            "Centro"
+        ],
+        "Cacimba de Dentro": [
+            "Centro"
+        ],
+        "Cacimbas": [
+            "Centro"
+        ],
+        "Caiçara": [
+            "Centro"
+        ],
+        "Cajazeiras": [
+            "Centro",
+            "Engenheiro Ávidos"
+        ],
+        "Cajazeirinhas": [
+            "Centro"
+        ],
+        "Caldas Brandão": [
+            "Cajá",
+            "Centro"
+        ],
+        "Camalaú": [
+            "Centro",
+            "Pindurão"
+        ],
+        "Campina Grande": [
+            "Acácio Figueiredo",
+            "Alto Branco",
+            "Antiga Cachoeira",
+            "Araxá",
+            "Área Rural de Campina Grande",
+            "Bairro das Cidades",
+            "Bela Vista",
+            "Belo Monte",
+            "Bento Figueiredo",
+            "Bodocongó",
+            "Campo de Angola I e II",
+            "Castelo Branco",
+            "Catingueira",
+            "Catirina",
+            "Catolé",
+            "Catolé de Boa Vista",
+            "Catolé do Zé Ferreira",
+            "Centenário",
+            "Centro",
+            "Cinza",
+            "Complexo Aluízio Campos",
+            "Conceição",
+            "Conjunto Alameda",
+            "Conjunto dos Professores",
+            "Conjunto Mariz",
+            "Conjunto Sonho Meu",
+            "Cruzeiro",
+            "Cuités",
+            "Dinamérica",
+            "Distrito dos Mecânicos",
+            "Distrito Industrial",
+            "Estação Velha",
+            "Galante",
+            "Glória 1 e 2",
+            "Grande Campina",
+            "Itararé",
+            "Jardim América",
+            "Jardim Atalaia",
+            "Jardim Borborema",
+            "Jardim Continental",
+            "Jardim Europa",
+            "Jardim Itararé",
+            "Jardim Paulistano",
+            "Jardim Quarenta",
+            "Jardim Tavares",
+            "Jeremias",
+            "José Pinheiro",
+            "Lago de Dentro",
+            "Lagoa de Dentro",
+            "Lauritzen",
+            "Liberdade",
+            "Ligeiro",
+            "Louzeiro",
+            "Major Veneziano",
+            "Malvinas",
+            "Mirante",
+            "Monte Castelo",
+            "Monte Santo",
+            "Morro do Pinto",
+            "Morro do Urubu",
+            "Mutirão",
+            "Nações",
+            "Nova Brasília",
+            "Novo Bodocongó",
+            "Novo Horizonte",
+            "Palmeira",
+            "Palmeira Imperial",
+            "Pedregal",
+            "Portal Sudoeste",
+            "Porteira de Pedra",
+            "Porteirinha de Pedra",
+            "Prata",
+            "Presidente Médici",
+            "Quarenta",
+            "Ramadinha",
+            "Ressurreição",
+            "Riacho dos Porcos",
+            "Rocha Cavalcanti",
+            "Ronaldo Cunha Lima",
+            "Rosa Cruz",
+            "Rosa Mística",
+            "Sandra Cavalcante",
+            "Santa Cruz",
+            "Santa Rosa",
+            "Santa Terezinha",
+            "Santo Antônio",
+            "São José",
+            "São José da Mata",
+            "Serra I e II",
+            "Serrotão",
+            "Severino Cabral",
+            "Sítio Bosque",
+            "Sítio Brito",
+            "Sítio Capim Grande",
+            "Sítio Caridade",
+            "Sítio Chã de Dentro",
+            "Sítio de Baixo/Sítio de Cima",
+            "Sítio Estreito",
+            "Sítio Izidro",
+            "Sítio Joaquim Vieira",
+            "Sítio Laranjeira",
+            "Sítio Lucas",
+            "Sítio Marinho",
+            "Sítio Massapé",
+            "Sítio Nova Várzea",
+            "Sítio Pau Dentro",
+            "Sítio Paus Brancos",
+            "Sítio Ramo",
+            "Sítio Salgadinhos",
+            "Sítio Santana",
+            "Sítio São Januário",
+            "Sítio São Jorge",
+            "Sítio Sirudo",
+            "Tambor",
+            "Três Irmãs",
+            "Universitário",
+            "Velame",
+            "Vila Cabral",
+            "Vila Cabral de Santa Rosa",
+            "Vila Cabral Santa Terezinha",
+            "Vila Maria da Luz"
+        ],
+        "Capim": [
+            "Centro",
+            "Olho d'Água do Sertão"
+        ],
+        "Caraúbas": [
+            "Centro",
+            "Povoado de Barreiras"
+        ],
+        "Carrapateira": [
+            "Centro"
+        ],
+        "Casserengue": [
+            "Centro"
+        ],
+        "Catingueira": [
+            "Centro",
+            "Itajubatiba"
+        ],
+        "Catolé do Rocha": [
+            "Centro",
+            "Coronel Maia",
+            "Picos"
+        ],
+        "Caturité": [
+            "Centro"
+        ],
+        "Conceição": [
+            "Cardoso",
+            "Centro",
+            "Montevidéo",
+            "Montevidéu"
+        ],
+        "Condado": [
+            "Centro"
+        ],
+        "Conde": [
+            "Centro",
+            "Distrito Industrial",
+            "Jacumã"
+        ],
+        "Congo": [
+            "Centro"
+        ],
+        "Coremas": [
+            "Centro"
+        ],
+        "Coxixola": [
+            "Centro"
+        ],
+        "Cruz do Espírito Santo": [
+            "Centro"
+        ],
+        "Cubati": [
+            "Centro"
+        ],
+        "Cuité": [
+            "Centro",
+            "Melo"
+        ],
+        "Cuité de Mamanguape": [
+            "Centro"
+        ],
+        "Cuitegi": [
+            "Centro"
+        ],
+        "Curral de Cima": [
+            "Centro",
+            "Povoado Estacada"
+        ],
+        "Curral Velho": [
+            "Centro"
+        ],
+        "Damião": [
+            "Centro"
+        ],
+        "Desterro": [
+            "Centro"
+        ],
+        "Diamante": [
+            "Centro",
+            "Vazante"
+        ],
+        "Dona Inês": [
+            "Centro"
+        ],
+        "Duas Estradas": [
+            "Centro"
+        ],
+        "Emas": [
+            "Centro"
+        ],
+        "Esperança": [
+            "Centro"
+        ],
+        "Fagundes": [
+            "Centro"
+        ],
+        "Frei Martinho": [
+            "Centro"
+        ],
+        "Gado Bravo": [
+            "Centro"
+        ],
+        "Guarabira": [
+            "Alto da Boa Vista",
+            "Antônio de Freitas Araújo",
+            "Área Rural de Guarabira",
+            "Areia Branca",
+            "Assis Chateaubriand",
+            "Bela Vista",
+            "Cachoeira",
+            "Cachoeira dos Guedes",
+            "Centro",
+            "Cidade Jardim",
+            "Clotilde Coutinho",
+            "Clóvis Bezerra",
+            "Cordeiro",
+            "Distrito Industrial",
+            "Distrito Mecânico",
+            "Dona Adália",
+            "Esplanada da Estação",
+            "Hildebrando Matias",
+            "João Cassimiro",
+            "Juá",
+            "Lucas Porpino",
+            "Monte das Oliveiras",
+            "Mutirão",
+            "Nações",
+            "Nordeste I",
+            "Nordeste II",
+            "Nossa Senhora Aparecida",
+            "Novo",
+            "Osmar de Aquino",
+            "Pirpiri",
+            "Povoado",
+            "Primavera",
+            "Rosário",
+            "Santa Terezinha",
+            "São José",
+            "Sol Nascente"
+        ],
+        "Gurinhém": [
+            "Centro"
+        ],
+        "Gurjão": [
+            "Centro"
+        ],
+        "Ibiara": [
+            "Cachoeirinha",
+            "Centro"
+        ],
+        "Igaracy": [
+            "Centro"
+        ],
+        "Imaculada": [
+            "Centro",
+            "Palmeira"
+        ],
+        "Ingá": [
+            "Bela Vista",
+            "Cazuzinha",
+            "Centro",
+            "Estação",
+            "Imbioca",
+            "Jardim Farias",
+            "Pontina",
+            "Senzala"
+        ],
+        "Itabaiana": [
+            "Campo Grande",
+            "Centro",
+            "Guarita"
+        ],
+        "Itaporanga": [
+            "Centro"
+        ],
+        "Itapororoca": [
+            "Centro"
+        ],
+        "Itatuba": [
+            "Centro"
+        ],
+        "Jacaraú": [
+            "Centro",
+            "Timbó"
+        ],
+        "Jericó": [
+            "Centro"
+        ],
+        "João Pessoa": [
+            "Aeroclube",
+            "Água Fria",
+            "Altiplano Cabo Branco",
+            "Alto do Céu",
+            "Alto do Mateus",
+            "Anatólia",
+            "Área Rural de João Pessoa",
+            "Bancários",
+            "Barra de Gramame",
+            "Bessa",
+            "Brisamar",
+            "Cabo Branco",
+            "Castelo Branco",
+            "Centro",
+            "Cidade dos Colibris",
+            "Costa do Sol",
+            "Costa e Silva",
+            "Cristo Redentor",
+            "Cruz das Armas",
+            "Cuiá",
+            "Distrito Industrial",
+            "Ernani Sátiro",
+            "Ernesto Geisel",
+            "Estados",
+            "Expedicionários",
+            "Funcionários",
+            "Gramame",
+            "Grotão",
+            "Ilha do Bispo",
+            "Indústrias",
+            "Ipês",
+            "Jaguaribe",
+            "Jardim Cidade Universitária",
+            "Jardim Oceania",
+            "Jardim São Paulo",
+            "Jardim Veneza",
+            "João Agripino",
+            "João Paulo II",
+            "José Américo de Almeida",
+            "Manaíra",
+            "Mandacaru",
+            "Mangabeira",
+            "Mata do Buraquinho",
+            "Miramar",
+            "Muçumagro",
+            "Mumbaba",
+            "Mussuré",
+            "Oitizeiro",
+            "Padre Zé",
+            "Paratibe",
+            "Pedro Gondim",
+            "Penha",
+            "Planalto da Boa Esperança",
+            "Ponta do Seixas",
+            "Portal do Sol",
+            "Roger",
+            "São José",
+            "Tambaú",
+            "Tambauzinho",
+            "Tambiá",
+            "Torre",
+            "Treze de Maio",
+            "Trincheiras",
+            "Valentina de Figueiredo",
+            "Varadouro",
+            "Varjão"
+        ],
+        "Joca Claudino": [
+            "Centro"
+        ],
+        "Juarez Távora": [
+            "Centro",
+            "Povoado"
+        ],
+        "Juazeirinho": [
+            "Centro"
+        ],
+        "Junco do Seridó": [
+            "Centro",
+            "Povoado"
+        ],
+        "Juripiranga": [
+            "Centro"
+        ],
+        "Juru": [
+            "Centro"
+        ],
+        "Lagoa": [
+            "Centro"
+        ],
+        "Lagoa de Dentro": [
+            "Centro"
+        ],
+        "Lagoa Seca": [
+            "Centro",
+            "Povoado Chã do Marinho",
+            "Povoado Floriano",
+            "Povoado São Pedro",
+            "Sítio"
+        ],
+        "Lastro": [
+            "Centro"
+        ],
+        "Livramento": [
+            "Centro"
+        ],
+        "Logradouro": [
+            "Centro"
+        ],
+        "Lucena": [
+            "Centro",
+            "Praia de Fagundes"
+        ],
+        "Mãe d'Água": [
+            "Centro"
+        ],
+        "Malta": [
+            "Centro"
+        ],
+        "Mamanguape": [
+            "Camaratuba",
+            "Centro",
+            "Pitanga da Estrada",
+            "Pitanga de Estrada"
+        ],
+        "Manaíra": [
+            "Centro",
+            "Pelo Sinal"
+        ],
+        "Marcação": [
+            "Camurupim",
+            "Centro"
+        ],
+        "Mari": [
+            "Centro"
+        ],
+        "Marizópolis": [
+            "Centro"
+        ],
+        "Massaranduba": [
+            "Centro"
+        ],
+        "Mataraca": [
+            "Barra de Camaratuba",
+            "Centro",
+            "Planalto II"
+        ],
+        "Matinhas": [
+            "Centro"
+        ],
+        "Mato Grosso": [
+            "Centro"
+        ],
+        "Maturéia": [
+            "Centro"
+        ],
+        "Mogeiro": [
+            "Centro",
+            "Gameleira"
+        ],
+        "Montadas": [
+            "Centro"
+        ],
+        "Monte Horebe": [
+            "Centro"
+        ],
+        "Monteiro": [
+            "Centro",
+            "Sitio"
+        ],
+        "Mulungu": [
+            "Centro"
+        ],
+        "Natuba": [
+            "Centro",
+            "Pirauá"
+        ],
+        "Nazarezinho": [
+            "Centro"
+        ],
+        "Nova Floresta": [
+            "Centro"
+        ],
+        "Nova Olinda": [
+            "Centro"
+        ],
+        "Nova Palmeira": [
+            "Centro"
+        ],
+        "Olho d'Água": [
+            "Centro",
+            "Socorro"
+        ],
+        "Olivedos": [
+            "Centro"
+        ],
+        "Ouro Velho": [
+            "Centro"
+        ],
+        "Parari": [
+            "Centro"
+        ],
+        "Passagem": [
+            "Centro",
+            "Povoado"
+        ],
+        "Patos": [
+            "Alto da Tubiba",
+            "Ana Leite",
+            "Área Rural de Patos",
+            "Bela Vista",
+            "Belo Horizonte",
+            "Bivar Olinto",
+            "Brasília",
+            "Centro",
+            "Distrito Industrial",
+            "Estados",
+            "Jardim Assunção",
+            "Jardim Europa",
+            "Jardim Magnólia",
+            "Jatobá",
+            "Liberdade",
+            "Maternidade",
+            "Monte Castelo",
+            "Morada do Sol",
+            "Morro",
+            "Noé Trajano",
+            "Nova Conquista",
+            "Novo Horizonte",
+            "Salgadinho",
+            "Santa Cecília",
+            "Santa Gertrudes",
+            "Santo Antônio",
+            "São Sebastião",
+            "Sete Casas"
+        ],
+        "Paulista": [
+            "Centro",
+            "Ipueiras",
+            "Mimoso"
+        ],
+        "Pedra Branca": [
+            "Centro"
+        ],
+        "Pedra Lavrada": [
+            "Centro"
+        ],
+        "Pedras de Fogo": [
+            "Centro",
+            "Povoado"
+        ],
+        "Pedro Régis": [
+            "Centro"
+        ],
+        "Piancó": [
+            "Centro"
+        ],
+        "Picuí": [
+            "Centro"
+        ],
+        "Pilar": [
+            "Centro"
+        ],
+        "Pilões": [
+            "Centro"
+        ],
+        "Pilõezinhos": [
+            "Centro"
+        ],
+        "Pirpirituba": [
+            "Centro"
+        ],
+        "Pitimbu": [
+            "Centro"
+        ],
+        "Pocinhos": [
+            "Centro",
+            "Nazaré"
+        ],
+        "Poço Dantas": [
+            "Centro",
+            "Tanques"
+        ],
+        "Poço de José de Moura": [
+            "Centro"
+        ],
+        "Pombal": [
+            "Centro",
+            "Jardim Rogério",
+            "Nova Vida",
+            "Pereiros",
+            "Santa Rosa",
+            "Várzea Comprida"
+        ],
+        "Prata": [
+            "Centro"
+        ],
+        "Princesa Isabel": [
+            "Centro"
+        ],
+        "Puxinanã": [
+            "Centro",
+            "Povoado"
+        ],
+        "Queimadas": [
+            "Centro",
+            "Sitio"
+        ],
+        "Quixaba": [
+            "Centro"
+        ],
+        "Remígio": [
+            "Centro",
+            "Povoado"
+        ],
+        "Riachão": [
+            "Centro"
+        ],
+        "Riachão do Bacamarte": [
+            "Centro"
+        ],
+        "Riachão do Poço": [
+            "Centro"
+        ],
+        "Riacho de Santo Antônio": [
+            "Centro"
+        ],
+        "Riacho dos Cavalos": [
+            "Centro"
+        ],
+        "Rio Tinto": [
+            "Barra do Mamanguape",
+            "Camurupim",
+            "Centro",
+            "Povoado",
+            "Salema"
+        ],
+        "Salgadinho": [
+            "Centro",
+            "São José da Batalha"
+        ],
+        "Salgado de São Félix": [
+            "Centro",
+            "Dois Riachos",
+            "Feira Nova",
+            "Povoado"
+        ],
+        "Santa Cecília": [
+            "Centro"
+        ],
+        "Santa Cruz": [
+            "Casinha do Homem",
+            "Centro",
+            "São Pedro"
+        ],
+        "Santa Helena": [
+            "Centro",
+            "Povoado Várzea da Ema"
+        ],
+        "Santa Inês": [
+            "Centro"
+        ],
+        "Santa Luzia": [
+            "Antônio Bento",
+            "Centro",
+            "Frei Damião",
+            "Nossa Senhora de Fátima",
+            "São José",
+            "São Sebastião"
+        ],
+        "Santa Rita": [
+            "Açude",
+            "Área Rural de Santa Rita",
+            "Bebelândia",
+            "Capitão",
+            "Centro",
+            "Cicerolândia",
+            "Distrito Industrial Flavio Ribeiro Coutinho",
+            "Distrito Industrial Metropolitano",
+            "Forte Velho",
+            "Heitel Santiago",
+            "Jardim Carolina",
+            "Jardim Europa",
+            "Jardins",
+            "Lerolândia",
+            "Liberdade",
+            "Marcos Moura",
+            "Municípios",
+            "Naelson Panta Júnior",
+            "Nossa Senhora do Livramento",
+            "Odilândia",
+            "Popular",
+            "Portal de Tibiri",
+            "Privê Aeroporto",
+            "Ribeira",
+            "Santo Amaro",
+            "Tambauzinho",
+            "Tibiri",
+            "Vale das Águas",
+            "Vale de Santa Rita",
+            "Várzea Nova",
+            "Vidal de Negreiros",
+            "Vila Tibiri"
+        ],
+        "Santa Teresinha": [
+            "Centro"
+        ],
+        "Santana de Mangueira": [
+            "Centro"
+        ],
+        "Santana dos Garrotes": [
+            "Centro",
+            "Pitombeira de Dentro"
+        ],
+        "Santo André": [
+            "Centro"
+        ],
+        "São Bentinho": [
+            "Centro"
+        ],
+        "São Bento": [
+            "Centro"
+        ],
+        "São Domingos": [
+            "Centro"
+        ],
+        "São Domingos do Cariri": [
+            "Centro"
+        ],
+        "São Francisco": [
+            "Centro"
+        ],
+        "São João do Cariri": [
+            "Centro"
+        ],
+        "São João do Rio do Peixe": [
+            "Centro",
+            "Umari"
+        ],
+        "São João do Tigre": [
+            "Centro",
+            "Santa Maria"
+        ],
+        "São José da Lagoa Tapada": [
+            "Centro"
+        ],
+        "São José de Caiana": [
+            "Centro"
+        ],
+        "São José de Espinharas": [
+            "Centro"
+        ],
+        "São José de Piranhas": [
+            "Bom Jesus",
+            "Centro"
+        ],
+        "São José de Princesa": [
+            "Centro"
+        ],
+        "São José do Bonfim": [
+            "Centro"
+        ],
+        "São José do Brejo do Cruz": [
+            "Centro"
+        ],
+        "São José do Sabugi": [
+            "Centro"
+        ],
+        "São José dos Cordeiros": [
+            "Centro"
+        ],
+        "São José dos Ramos": [
+            "Centro"
+        ],
+        "São Mamede": [
+            "Centro"
+        ],
+        "São Miguel de Taipu": [
+            "Centro"
+        ],
+        "São Sebastião de Lagoa de Roça": [
+            "Centro"
+        ],
+        "São Sebastião do Umbuzeiro": [
+            "Centro"
+        ],
+        "São Vicente do Seridó": [
+            "Centro",
+            "Seridó"
+        ],
+        "Sapé": [
+            "Centro",
+            "Renascença"
+        ],
+        "Serra Branca": [
+            "Centro",
+            "Santa Luzia do Cariri",
+            "Sucuru"
+        ],
+        "Serra da Raiz": [
+            "Centro"
+        ],
+        "Serra Grande": [
+            "Centro"
+        ],
+        "Serra Redonda": [
+            "Centro",
+            "Povoado"
+        ],
+        "Serraria": [
+            "Centro"
+        ],
+        "Sertãozinho": [
+            "Centro"
+        ],
+        "Sobrado": [
+            "Centro"
+        ],
+        "Solânea": [
+            "Centro"
+        ],
+        "Soledade": [
+            "Bom Sucesso",
+            "Centro"
+        ],
+        "Sossêgo": [
+            "Centro"
+        ],
+        "Sousa": [
+            "Alto do Capanema",
+            "Alto do Cruzeiro",
+            "André Gadelha",
+            "Angelim",
+            "Área Rural de Sousa",
+            "Areias",
+            "Assis Garrido",
+            "Augusto Braga",
+            "Bancários",
+            "Boa Vista",
+            "Campo Alegre",
+            "Centro",
+            "Distrito Industrial Francisco Coura de Sousa",
+            "Doutor Zezé",
+            "Estação",
+            "Estreito",
+            "Frei Damião",
+            "Gato Preto",
+            "Guanabara",
+            "Jardim Bela Vista",
+            "Jardim Brasília",
+            "Jardim Iracema",
+            "Jardim Santana",
+            "Jardim Sorrilândia I",
+            "Jardim Sorrilândia II",
+            "Jardim Sorrilândia III",
+            "Jardins",
+            "José Lins do Rego",
+            "Lagoa das Estrelas",
+            "Maria Rachel",
+            "Nossa Senhora de Fátima",
+            "Núcleo N 2",
+            "Núcleo N 3",
+            "Pereiros",
+            "Projeto Mariz",
+            "São Gonçalo",
+            "São José",
+            "São Vicente",
+            "Várzea da Cruz",
+            "Zú Silva"
+        ],
+        "Sumé": [
+            "Centro",
+            "Pio X"
+        ],
+        "Tacima": [
+            "Centro"
+        ],
+        "Taperoá": [
+            "Centro"
+        ],
+        "Tavares": [
+            "Centro"
+        ],
+        "Teixeira": [
+            "Centro"
+        ],
+        "Tenório": [
+            "Centro"
+        ],
+        "Triunfo": [
+            "Centro"
+        ],
+        "Uiraúna": [
+            "Areias",
+            "Centro",
+            "Fazenda Nova",
+            "Quixadá",
+            "Santa Rita",
+            "São João Bosco"
+        ],
+        "Umbuzeiro": [
+            "Centro",
+            "Mata Virgem"
+        ],
+        "Várzea": [
+            "Centro"
+        ],
+        "Vieirópolis": [
+            "Centro"
+        ],
+        "Vista Serrana": [
+            "Centro"
+        ],
+        "Zabelê": [
+            "Centro"
+        ]
+    }
+}

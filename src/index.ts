@@ -7,6 +7,7 @@ import { documentoRoutes } from './features/documento/documento-route';
 import { profissaoRoutes } from './features/profissao/profissao-route';
 import { authRoutes } from './features/auth/auth-route';
 import { formularioRoutes } from './features/formulario/formulario-route';
+import { localidadesRoutes } from './features/localidades/localidades-route';
 import { seedAdminUsersFromEnv } from './features/auth/seed-admin';
 import dotenv from 'dotenv';
 import cors from 'cors';
@@ -17,10 +18,6 @@ dotenv.config();
 const requiredEnvVars = [
   'ODONTO_GUARDIAO_EMAIL',
   'ODONTO_GUARDIAO_PWD',
-  'CONSELHO_REGIAO_NORTE_EMAIL',
-  'CONSELHO_REGIAO_SUL_EMAIL',
-  'CONSELHO_REGIAO_LESTE_EMAIL',
-  'CONSELHO_REGIAO_OESTE_EMAIL',
   'USUARIO_ADMIN_SEED_JSON',
   'JWT_SECRET',
   'JWT_REFRESH_SECRET'
@@ -59,6 +56,7 @@ app.use('/data/fotoDeCapa', express.static(path.join(process.cwd(), 'data', 'fot
 // Rotas
 app.use('/api', denunciaRoutes);
 app.use('/api', conselhoTutelarRoutes);
+app.use('/api', localidadesRoutes);
 app.use('/api', profissaoRoutes);
 app.use('/api', documentoRoutes);
 app.use('/api', authRoutes);

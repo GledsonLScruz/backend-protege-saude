@@ -1,24 +1,20 @@
-export type SubConselho = {
-  setor: string;
-  emails: string[];
-  conselhoDireito: string;
-  conselhoTutelar: string;
-}
-
-export type ConselhoRegional = {
-  setor: string;
-  nome: string;
-  contato: string[];
-  bairros: string[];
-}
-
 export type ConselhoTutelar = {
-  id: number;
+  id?: number;
+  nome: string;
+  email: string;
   cidade: string;
-  endereco: string;
-  emails: string[];
-  conselhoDireito: string;
-  conselhoTutelar: string;
-  conselhosRegionais?: ConselhoRegional[];
-  subconselhos?: SubConselho[]
-}
+  estado: string;
+  bairros: string[];
+  data_criacao?: string;
+  data_update?: string | null;
+};
+
+export type CriarConselhoTutelarDTO = {
+  nome: string;
+  email: string;
+  cidade: string;
+  estado: string;
+  bairros: string[];
+};
+
+export type AtualizarConselhoTutelarDTO = CriarConselhoTutelarDTO;

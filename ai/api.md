@@ -78,27 +78,42 @@
   **Erros:** 400 validação; 404 não encontrado.
 
 ## Denúncias
-- `POST /api/denuncia`  
-  **Request (FormData):** campo `regiao` obrigatório (`norte|sul|leste|oeste`); arquivo `pdf` opcional (`pdf`).  
-  **Validações:** `regiao` obrigatório (400 se ausente); serviço gera protocolo e envia e-mail para a região.  
-  **Response 201:** `{ "message": "Denúncia enviada com sucesso.", "protocolo": string }`  
-  **Erros:** 500 falha ao enviar/registrar denúncia.
-- `GET /api/relatorio-denuncia`  
-  **Response 200:** lista de denúncias `[{ id, protocolo, data_criacao, regiao, profissao_id? }]` ordenada por data de criação desc.  
+- `POST /api/denuncia`
+  **Request (FormData):** `profissao_id` (number), `cidade` (string), `estado` (string), `bairro` (string), `regiao?` (`norte|sul|leste|oeste`, legado), arquivo `pdf` obrigatório (`pdf`).
+  **Validações:** profissão obrigatória, existente e ativa; `cidade`, `estado` e `bairro` obrigatórios; deve existir Conselho Tutelar cadastrado para a combinação `cidade + estado + bairro`; serviço gera protocolo e envia e-mail para o `email` do conselho encontrado.
+  **Response 201:** `{ "message": "Denúncia enviada com sucesso.", "protocolo": string }`
+  **Erros:** 400 validação; 404 profissão ou conselho não encontrado; 500 falha ao enviar/registrar denúncia.
+- `GET /api/relatorio-denuncia`
+  **Response 200:** lista de denúncias `[{ id, protocolo, data_criacao, regiao, profissao_id?, conselho_tutelar_id?, cidade?, estado?, bairro? }]` ordenada por data de criação desc.
   **Observação:** após a exclusão de uma profissão, denúncias históricas permanecem na listagem com `profissao_id = null`.
 
 ## Conselhos Tutelares
-- `GET /api/conselhos-tutelares`  
-  **Response 200:** lista completa de conselhos tutelares.
-- `GET /api/conselhos-tutelares/search?termo=`  
-  **Query:** `termo` (string) obrigatório.  
-  **Validações:** 400 se termo ausente ou vazio.  
-  **Response 200:** conselhos filtrados por cidade ou e-mail.
-- `GET /api/conselhos-tutelares/:id`  
-  **Params:** `id` numérico.  
-  **Response 200:** conselho pelo id.  
+- `GET /api/conselhos-tutelares`
+  **Response 200:** lista completa de conselhos tutelares dinâmicos (`id, nome, email, cidade, estado, bairros, data_criacao, data_update`).
+- `GET /api/conselhos-tutelares/search?termo=`
+  **Query:** `termo` (string) obrigatório.
+  **Validações:** 400 se termo ausente ou vazio.
+  **Response 200:** conselhos filtrados por nome, cidade, estado, e-mail ou bairros.
+- `GET /api/conselhos-tutelares/:id`
+  **Params:** `id` numérico.
+  **Response 200:** conselho pelo id.
   **Erros:** 404 se não encontrado.
-- `GET /api/conselhos-tutelares/cidade/:cidade`  
-  **Params:** `cidade` string.  
-  **Response 200:** conselho da cidade exata.  
+- `GET /api/conselhos-tutelares/cidade/:cidade`
+  **Params:** `cidade` string.
+  **Response 200:** conselho da cidade exata.
   **Erros:** 404 se não encontrado.
+- `POST /api/conselhos-tutelares`  *necessário autenticação*
+  **Request (JSON):** `{ "nome": string, "email": string, "cidade": string, "estado": string, "bairros": string[] }`
+  **Validações:** `nome`, `email`, `cidade` e `estado` obrigatórios; `email` válido; `bairros` deve ser array; bairros não podem repetir dentro do mesmo conselho; um bairro não pode estar vinculado a outro conselho da mesma cidade/estado.
+  **Response 201:** `ConselhoTutelar` criado.
+  **Erros:** 400 validação; 409 duplicidade.
+- `PUT /api/conselhos-tutelares/:id`  *necessário autenticação*
+  **Params:** `id` numérico.
+  **Request (JSON):** `{ "nome": string, "email": string, "cidade": string, "estado": string, "bairros": string[] }`
+  **Validações:** `id` numérico; `nome`, `email`, `cidade` e `estado` obrigatórios; `email` válido; `bairros` deve ser array; bairros não podem repetir dentro do mesmo conselho; um bairro não pode estar vinculado a outro conselho da mesma cidade/estado, ignorando o próprio conselho editado.
+  **Response 200:** `ConselhoTutelar` atualizado.
+  **Erros:** 400 validação; 404 não encontrado; 409 duplicidade.
+- `DELETE /api/conselhos-tutelares/:id`  *necessário autenticação*
+  **Params:** `id` numérico.
+  **Response 200:** `{ "message": "Conselho tutelar removido com sucesso" }`.
+  **Erros:** 400 validação; 404 não encontrado.

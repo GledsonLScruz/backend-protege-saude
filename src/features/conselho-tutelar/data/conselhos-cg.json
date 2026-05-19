@@ -47,9 +47,9 @@
                 "Liberdade",
                 "Ligeiro",
                 "Novo Horizonte",
-                "Presidente Médice",
+                "Presidente Médici",
                 "Rosa Cruz",
-                "Ressureição",
+                "Ressurreição",
                 "Sítio Lucas",
                 "Sítio Paus Brancos",
                 "Sítio Salgadinhos",
@@ -87,7 +87,7 @@
                 "Nova Brasília",
                 "Santa Terezinha",
                 "Porteira de Pedra",
-                "Santo Antonio",
+                "Santo Antônio",
                 "Sítio Pau Dentro",
                 "Sítio Brito",
                 "Sítio Caridade",
@@ -96,14 +96,14 @@
                 "Sítio Laranjeira",
                 "Sítio Marinho",
                 "Sítio Massapé",
-                "Sítio Nova Varzéa",
+                "Sítio Nova Várzea",
                 "Sítio Ramo",
                 "Sítio Santana",
                 "Sítio São Jorge",
                 "Sítio Sirudo",
                 "Vila Cabral Santa Terezinha",
                 "Vila Maria da Luz",
-                "Complexo Aluizio Campos"
+                "Complexo Aluízio Campos"
             ]
         },
         {
@@ -114,7 +114,7 @@
             "estado": "PB",
             "bairros": [
                 "Bodocongó",
-                "Pedegral",
+                "Pedregal",
                 "Campo de Angola I e II",
                 "Catirina",
                 "Centenário",

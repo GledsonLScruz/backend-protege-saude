@@ -25,9 +25,15 @@
 - `id` INTEGER PK AUTOINCREMENT
 - `protocolo` TEXT UNIQUE NOT NULL
 - `data_criacao` DATETIME DEFAULT CURRENT_TIMESTAMP
-- `regiao` TEXT NOT NULL
+- `regiao` TEXT NOT NULL (legado; não define mais o destinatário)
 - `profissao_id` INTEGER NULL (FK `profissao.id`, `ON DELETE SET NULL`)
+- `conselho_tutelar_id` INTEGER NULL (FK `conselho_tutelar.id`, `ON DELETE SET NULL`)
+- `cidade` TEXT NULL
+- `estado` TEXT NULL
+- `bairro` TEXT NULL
 - Regra de integridade: quando uma profissão é excluída, a denúncia permanece e `profissao_id` vira `NULL`
+- Regra de integridade: quando um conselho tutelar é excluído, a denúncia permanece e `conselho_tutelar_id` vira `NULL`
+- Regra de envio: o conselho responsável é resolvido por `cidade + estado + bairro`
 
 ## documentos
 - `id` INTEGER PK AUTOINCREMENT
@@ -86,14 +92,20 @@
   - `modo_opcoes = nao_se_aplica` para os demais tipos
 - Regra de privacidade futura: fotos de denuncias anonimas nao podem ser persistidas em banco nem em disco; quando esse fluxo existir, elas so poderao permanecer em memoria durante a geracao do PDF enviado por email
 
-## conselho_tutelar (carga estática em JSON)
-- `id` INTEGER
-- `cidade` TEXT
-- `endereco` TEXT
-- `emails` TEXT[] (armazenado no JSON)
-- `conselhoDireito` TEXT
-- `conselhoTutelar` TEXT
-- `conselhosRegionais`/`subconselhos` opcionais no JSON
+## conselho_tutelar
+- `id` INTEGER PK AUTOINCREMENT
+- `nome` TEXT NOT NULL
+- `email` TEXT NOT NULL
+- `cidade` TEXT NOT NULL
+- `estado` TEXT NOT NULL
+- `bairros` TEXT NOT NULL (JSON string com `string[]`)
+- `data_criacao` DATETIME DEFAULT CURRENT_TIMESTAMP
+- `data_update` DATETIME
+- Índice/constraint:
+  - `UNIQUE (nome, cidade, estado)`
+  - `idx_conselho_tutelar_cidade_estado (cidade, estado)`
+- Seed inicial: quando a tabela está vazia, importar `src/features/conselho-tutelar/data/conselhos-cg.json`
+- Regra de domínio: dentro da mesma `cidade + estado`, um bairro só pode pertencer a um conselho
 
 ## Tipos auxiliares (runtime)
 - DTOs de profissão:  
@@ -105,4 +117,9 @@
   - Criar (multipart/form-data): `profissao_id`, `ordem_index?`, `titulo`, `descricao?`, `pontos_foco?`, `url_online?`, `arquivo?`, `foto_capa?`
   - Atualizar (multipart/form-data): `profissao_id?`, `ordem_index?`, `titulo?`, `descricao?`, `pontos_foco?`, `url_online?`, `arquivo?`, `foto_capa?`
   - Reordenar (JSON): `profissao_id`, `itens: [{ id, ordem_index }]`
+- DTOs de conselho tutelar:
+  - Criar: `nome`, `email`, `cidade`, `estado`, `bairros`
+  - Remover: `DELETE /api/conselhos-tutelares/:id`
+- DTO de denúncia:
+  - Criar (multipart/form-data): `profissao_id`, `cidade`, `estado`, `bairro`, `regiao?`, `pdf`
 - Login: `usuario`, `senha`

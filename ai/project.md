@@ -240,27 +240,33 @@ Nenhum dado sensível do formulário é persistido no banco.
 ### 10.1 Conselho
 
 * Representa uma unidade administrativa
+* É cadastrado e excluído pelo painel administrativo
+* Não depende de alteração de código ou variável de ambiente para existir
 * Possui:
 
   * Nome
   * Cidade
+  * Estado
   * Email principal
+  * Bairros atendidos
 * Pode existir sem bairros associados
 
 ### 10.2 Bairros
 
 * Associação opcional
-* Cada bairro pertence a um único conselho
+* Cada bairro pertence a um único conselho dentro da mesma cidade e estado
 * O nome do bairro deve ser único dentro do conselho
+* O cadastro administrativo deve bloquear bairros duplicados entre conselhos da mesma cidade e estado
 
 ---
 
-## 11. Identificação de Região
+## 11. Identificação do Conselho Responsável
 
-* A região é determinada no backend
-* Baseada nos dados informados no formulário
-* O usuário não escolhe a região manualmente
-* A região é armazenada como texto na denúncia
+* O conselho responsável é determinado no backend
+* A busca usa `cidade`, `estado` e `bairro` informados no formulário
+* O usuário não escolhe o e-mail nem o conselho manualmente
+* O e-mail de destino vem do cadastro dinâmico do Conselho Tutelar
+* A `regiao` é mantida apenas como dado legado quando enviada, sem definir o destinatário
 
 ---
 
@@ -316,8 +322,9 @@ Nenhum dado sensível do formulário é persistido no banco.
 
 ### 14.3 Conselho sem bairro configurado
 
-* O sistema deve usar o e-mail principal do conselho
-* A denúncia não pode ser bloqueada
+* O conselho pode ser cadastrado sem bairros para gestão administrativa
+* Uma denúncia com bairro informado só deve ser enviada quando houver conselho que atenda aquele bairro na cidade e estado informados
+* Se nenhum conselho atender o bairro, a denúncia deve ser bloqueada antes do envio
 
 ### 14.4 Alteração de formulário em uso
 
@@ -331,6 +338,7 @@ Nenhum dado sensível do formulário é persistido no banco.
 * Banco de dados não armazena conteúdo da denúncia
 * O sistema depende de conectividade para envio
 * O sistema deve funcionar com múltiplas profissões sem reconfiguração de código
+* O sistema deve funcionar com múltiplos Conselhos Tutelares e bairros sem reconfiguração de código
 
 ---
 

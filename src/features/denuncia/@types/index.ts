@@ -4,6 +4,10 @@ export interface Denuncia {
   data_criacao?: string; // ISO date string
   regiao: string;
   profissao_id?: number | null;
+  conselho_tutelar_id?: number | null;
+  cidade?: string | null;
+  estado?: string | null;
+  bairro?: string | null;
 }
 
 export enum Regiao {
@@ -16,6 +20,9 @@ export enum Regiao {
 export interface EnviarDenunciaRequest {
   protocolo: string;
   pdf: Express.Multer.File;
-  regiao: Regiao;
+  regiao?: Regiao;
   profissao_id: number;
+  cidade: string;
+  estado: string;
+  bairro: string;
 }

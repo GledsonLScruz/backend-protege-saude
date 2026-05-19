@@ -2,6 +2,7 @@ import sqlite3 from 'sqlite3';
 import { open, Database } from 'sqlite';
 import path from 'path';
 import fs from 'fs';
+import conselhosCgData from '../features/conselho-tutelar/data/conselhos-cg.json';
 
 const DB_PATH = path.join(__dirname, '../../data/denuncias.db');
 const FORMULARIO_CAMPO_TIPOS = ['texto', 'textarea', 'numero', 'data', 'switch', 'select', 'radio', 'checkbox', 'foto'];
@@ -19,6 +20,13 @@ const FORMULARIO_CAMPO_MAX_FOTOS_CHECK = `
 
 type ColumnInfo = { name: string; notnull: number; type: string };
 type ForeignKeyInfo = { table: string; from: string; on_delete: string };
+type ConselhoSeed = {
+  nome: string;
+  email: string;
+  cidade: string;
+  estado: string;
+  bairros: string[];
+};
 
 async function columnExists(db: Database, table: string, column: string): Promise<boolean> {
   const rows = await db.all<ColumnInfo[]>(`PRAGMA table_info(${table});`);
@@ -62,6 +70,24 @@ async function sqlContains(db: Database, objectName: string, fragment: string): 
   return row?.sql?.includes(fragment) ?? false;
 }
 
+async function seedConselhosTutelares(db: Database): Promise<void> {
+  const row = await db.get<{ total: number }>(`SELECT COUNT(*) as total FROM conselho_tutelar`);
+  if ((row?.total ?? 0) > 0) return;
+
+  const conselhos = (conselhosCgData as { conselhos: ConselhoSeed[] }).conselhos;
+  for (const conselho of conselhos) {
+    await db.run(
+      `INSERT INTO conselho_tutelar (nome, email, cidade, estado, bairros)
+       VALUES (?, ?, ?, ?, ?)`,
+      conselho.nome,
+      conselho.email,
+      conselho.cidade,
+      conselho.estado,
+      JSON.stringify(conselho.bairros)
+    );
+  }
+}
+
 async function runMigrations(db: Database) {
   await db.exec('PRAGMA foreign_keys = OFF;');
   await db.exec('BEGIN;');
@@ -87,6 +113,30 @@ async function runMigrations(db: Database) {
         data_criacao DATETIME DEFAULT CURRENT_TIMESTAMP,
         data_update DATETIME
       );
+
+      CREATE TABLE IF NOT EXISTS conselho_tutelar (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        nome TEXT NOT NULL,
+        email TEXT NOT NULL,
+        cidade TEXT NOT NULL,
+        estado TEXT NOT NULL,
+        bairros TEXT NOT NULL,
+        data_criacao DATETIME DEFAULT CURRENT_TIMESTAMP,
+        data_update DATETIME,
+        UNIQUE (nome, cidade, estado)
+      );
+
+      CREATE INDEX IF NOT EXISTS idx_conselho_tutelar_cidade_estado
+        ON conselho_tutelar (cidade, estado);
+
+      CREATE TRIGGER IF NOT EXISTS trg_conselho_tutelar_data_update
+      AFTER UPDATE ON conselho_tutelar
+      FOR EACH ROW
+      BEGIN
+        UPDATE conselho_tutelar
+           SET data_update = CURRENT_TIMESTAMP
+         WHERE id = OLD.id;
+      END;
 
       CREATE TABLE IF NOT EXISTS documentos (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -167,6 +217,8 @@ async function runMigrations(db: Database) {
       END;
     `);
 
+    await seedConselhosTutelares(db);
+
     const profissaoDescricaoInfo = await getColumnInfo(db, 'profissao', 'descricao');
 
     if (profissaoDescricaoInfo?.notnull) {
@@ -193,12 +245,28 @@ async function runMigrations(db: Database) {
 
     const denunciasExists = await tableExists(db, 'denuncias');
     const hasProfissaoId = denunciasExists && await columnExists(db, 'denuncias', 'profissao_id');
+    const hasConselhoTutelarId = denunciasExists && await columnExists(db, 'denuncias', 'conselho_tutelar_id');
+    const hasCidade = denunciasExists && await columnExists(db, 'denuncias', 'cidade');
+    const hasEstado = denunciasExists && await columnExists(db, 'denuncias', 'estado');
+    const hasBairro = denunciasExists && await columnExists(db, 'denuncias', 'bairro');
     const denunciaFkSetNull =
       denunciasExists &&
       hasProfissaoId &&
       await foreignKeyUsesOnDelete(db, 'denuncias', 'profissao_id', 'profissao', 'SET NULL');
+    const denunciaConselhoFkSetNull =
+      denunciasExists &&
+      hasConselhoTutelarId &&
+      await foreignKeyUsesOnDelete(db, 'denuncias', 'conselho_tutelar_id', 'conselho_tutelar', 'SET NULL');
 
-    if (!hasProfissaoId || !denunciaFkSetNull) {
+    if (
+      !hasProfissaoId ||
+      !hasConselhoTutelarId ||
+      !hasCidade ||
+      !hasEstado ||
+      !hasBairro ||
+      !denunciaFkSetNull ||
+      !denunciaConselhoFkSetNull
+    ) {
       await db.exec(`
         CREATE TABLE IF NOT EXISTS denuncias_new (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -206,17 +274,36 @@ async function runMigrations(db: Database) {
           data_criacao DATETIME DEFAULT CURRENT_TIMESTAMP,
           regiao TEXT NOT NULL,
           profissao_id INTEGER,
-          FOREIGN KEY (profissao_id) REFERENCES profissao(id) ON DELETE SET NULL
+          conselho_tutelar_id INTEGER,
+          cidade TEXT,
+          estado TEXT,
+          bairro TEXT,
+          FOREIGN KEY (profissao_id) REFERENCES profissao(id) ON DELETE SET NULL,
+          FOREIGN KEY (conselho_tutelar_id) REFERENCES conselho_tutelar(id) ON DELETE SET NULL
         );
 
         ${denunciasExists ? `
-          INSERT INTO denuncias_new (id, protocolo, data_criacao, regiao, profissao_id)
+          INSERT INTO denuncias_new (
+            id,
+            protocolo,
+            data_criacao,
+            regiao,
+            profissao_id,
+            conselho_tutelar_id,
+            cidade,
+            estado,
+            bairro
+          )
           SELECT 
             id,
             protocolo,
             data_criacao,
             regiao,
-            ${hasProfissaoId ? 'profissao_id' : 'NULL'}
+            ${hasProfissaoId ? 'profissao_id' : 'NULL'},
+            ${hasConselhoTutelarId ? 'conselho_tutelar_id' : 'NULL'},
+            ${hasCidade ? 'cidade' : 'NULL'},
+            ${hasEstado ? 'estado' : 'NULL'},
+            ${hasBairro ? 'bairro' : 'NULL'}
           FROM denuncias;
 
           DROP TABLE denuncias;

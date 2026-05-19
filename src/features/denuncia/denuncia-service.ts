@@ -1,21 +1,71 @@
+import axios from 'axios';
 import { smtpConfig, transporter } from '../../integration/nodemailer';
-import { EnviarDenunciaRequest, Regiao } from './@types';
+import { EnviarDenunciaRequest } from './@types';
 import { DenunciaRepository } from './denuncia-repository';
 import db from '../../database/db';
 import { v4 as uuidv4 } from 'uuid';
 import { ProfissaoRepository } from '../profissao/profissao-repository';
+import { ConselhoTutelarRepository } from '../conselho-tutelar/conselho-tutelar-repository';
+import { LocalidadesService } from '../localidades/localidades-service';
 
-export const EMAIL_POR_REGIAO: Record<Regiao, string> = {
-  [Regiao.NORTE]: process.env.CONSELHO_REGIAO_NORTE_EMAIL!,
-  [Regiao.SUL]: process.env.CONSELHO_REGIAO_SUL_EMAIL!,
-  [Regiao.LESTE]: process.env.CONSELHO_REGIAO_LESTE_EMAIL!,
-  [Regiao.OESTE]: process.env.CONSELHO_REGIAO_OESTE_EMAIL!
+const normalizarTextoObrigatorio = (value: string, nomeCampo: string): string => {
+  const normalized = String(value ?? '').trim();
+  if (!normalized) throw new Error(`${nomeCampo} é obrigatório.`);
+  return normalized;
 };
+
+type ViaCepResponse = {
+  erro?: boolean;
+  cep?: string;
+  uf?: string;
+  localidade?: string;
+  bairro?: string;
+  logradouro?: string;
+};
+
+type ValidarCepCodigoErro =
+  | 'CEP_INVALIDO'
+  | 'CEP_NAO_ENCONTRADO'
+  | 'BAIRRO_NAO_IDENTIFICADO'
+  | 'BAIRRO_FORA_DO_CATALOGO'
+  | 'CONSELHO_NAO_CADASTRADO'
+  | 'ERRO_CONSULTA_CEP';
+
+type ValidarCepBloqueado = {
+  podeProsseguir: false;
+  codigo: ValidarCepCodigoErro;
+  mensagem: string;
+};
+
+type ValidarCepSucesso = {
+  podeProsseguir: true;
+  endereco: {
+    cep: string;
+    estado: string;
+    cidade: string;
+    bairro: string;
+    logradouro: string;
+    rua: string;
+  };
+  conselho: {
+    id: number;
+    nome: string;
+  };
+};
+
+export type ValidarCepResult = ValidarCepSucesso | ValidarCepBloqueado;
+
+const bloquearCep = (codigo: ValidarCepCodigoErro, mensagem: string): ValidarCepBloqueado => ({
+  podeProsseguir: false,
+  codigo,
+  mensagem,
+});
 
 export const DenunciaService = async () => {
   const database = await db
   const denunciaRepo = new DenunciaRepository(database);
   const profissaoRepo = new ProfissaoRepository(database);
+  const conselhoRepo = new ConselhoTutelarRepository(database);
 
   function gerarProtocolo(): string {
     const ano = new Date().getFullYear();
@@ -23,11 +73,73 @@ export const DenunciaService = async () => {
     return `DEN-${ano}-${uuid.toUpperCase()}`;
   }
 
-  const enviarDenuncia = async (body: EnviarDenunciaRequest) => {
-    if (!Object.values(Regiao).includes(body.regiao)) {
-      throw new Error('Região inválida.');
+  const validarCep = async (cepInformado: string): Promise<ValidarCepResult> => {
+    const cep = String(cepInformado ?? '').replace(/\D/g, '');
+
+    if (cep.length !== 8) {
+      return bloquearCep('CEP_INVALIDO', 'CEP inválido. Informe um CEP com 8 dígitos.');
     }
 
+    let viaCep: ViaCepResponse;
+    try {
+      const response = await axios.get<ViaCepResponse>(`https://viacep.com.br/ws/${cep}/json/`, {
+        timeout: 8000,
+      });
+      viaCep = response.data;
+    } catch (error) {
+      console.error('Erro ao consultar ViaCEP:', error);
+      return bloquearCep('ERRO_CONSULTA_CEP', 'Não foi possível consultar o CEP no momento.');
+    }
+
+    if (!viaCep || viaCep.erro) {
+      return bloquearCep('CEP_NAO_ENCONTRADO', 'CEP não encontrado.');
+    }
+
+    const estado = String(viaCep.uf ?? '').trim();
+    const cidade = String(viaCep.localidade ?? '').trim();
+    const bairro = String(viaCep.bairro ?? '').trim();
+    const logradouro = String(viaCep.logradouro ?? '').trim();
+
+    if (!estado || !cidade || !bairro) {
+      return bloquearCep(
+        'BAIRRO_NAO_IDENTIFICADO',
+        'Não foi possível identificar cidade, estado e bairro para este CEP.'
+      );
+    }
+
+    const enderecoCatalogo = LocalidadesService.validarEndereco(estado, cidade, bairro);
+    if (!enderecoCatalogo) {
+      return bloquearCep('BAIRRO_FORA_DO_CATALOGO', 'O bairro identificado não está no catálogo oficial.');
+    }
+
+    const conselho = await conselhoRepo.encontrarPorEndereco(
+      enderecoCatalogo.cidade,
+      enderecoCatalogo.estado,
+      enderecoCatalogo.bairro
+    );
+
+    if (!conselho) {
+      return bloquearCep('CONSELHO_NAO_CADASTRADO', 'Não existe conselho tutelar cadastrado para este bairro.');
+    }
+
+    return {
+      podeProsseguir: true,
+      endereco: {
+        cep,
+        estado: enderecoCatalogo.estado,
+        cidade: enderecoCatalogo.cidade,
+        bairro: enderecoCatalogo.bairro,
+        logradouro,
+        rua: logradouro,
+      },
+      conselho: {
+        id: conselho.id!,
+        nome: conselho.nome,
+      },
+    };
+  };
+
+  const enviarDenuncia = async (body: EnviarDenunciaRequest) => {
     if (!Number.isInteger(body.profissao_id) || body.profissao_id <= 0) {
       throw new Error('Profissão inválida.');
     }
@@ -44,10 +156,26 @@ export const DenunciaService = async () => {
       throw new Error('O arquivo PDF é obrigatório.');
     }
 
-    const emailDestino = EMAIL_POR_REGIAO[body.regiao];
-    if (!emailDestino) {
-      throw new Error('Região inválida.');
+    const cidade = normalizarTextoObrigatorio(body.cidade, 'cidade');
+    const estado = normalizarTextoObrigatorio(body.estado, 'estado').toUpperCase();
+    const bairro = normalizarTextoObrigatorio(body.bairro, 'bairro');
+    const enderecoCatalogo = LocalidadesService.validarEndereco(estado, cidade, bairro);
+
+    if (!enderecoCatalogo) {
+      throw new Error('Bairro fora do catálogo oficial.');
     }
+
+    const conselho = await conselhoRepo.encontrarPorEndereco(
+      enderecoCatalogo.cidade,
+      enderecoCatalogo.estado,
+      enderecoCatalogo.bairro
+    );
+
+    if (!conselho) {
+      throw new Error('Conselho tutelar não encontrado para cidade, estado e bairro informados.');
+    }
+
+    const emailDestino = conselho.email;
 
     const protocolo = gerarProtocolo();
 
@@ -85,10 +213,14 @@ export const DenunciaService = async () => {
         attachments,
       });
 
-      const denunciaId = await denunciaRepo.criar({
+      await denunciaRepo.criar({
         protocolo,
-        regiao: body.regiao,
+        regiao: body.regiao ?? '',
         profissao_id: body.profissao_id,
+        conselho_tutelar_id: conselho.id,
+        cidade: enderecoCatalogo.cidade,
+        estado: enderecoCatalogo.estado,
+        bairro: enderecoCatalogo.bairro,
       })
 
       console.log(`Email enviado: ${info.response}`);
@@ -104,6 +236,7 @@ export const DenunciaService = async () => {
   }
 
   return {
+    validarCep,
     enviarDenuncia,
     listaTodasDenuncias
   }

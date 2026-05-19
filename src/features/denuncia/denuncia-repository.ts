@@ -1,16 +1,37 @@
 import { Database } from 'sqlite';
 import { Denuncia, EnviarDenunciaRequest } from './@types';
 
+type CriarDenunciaData = Omit<Partial<EnviarDenunciaRequest>, 'regiao'> & {
+  conselho_tutelar_id?: number;
+  regiao?: string;
+};
+
 export class DenunciaRepository {
   constructor(private db: Database) { }
 
-  async criar(denuncia: Partial<EnviarDenunciaRequest>): Promise<number> {
-    const { protocolo, regiao, profissao_id } = denuncia;
+  async criar(denuncia: CriarDenunciaData): Promise<number> {
+    const { protocolo, regiao, profissao_id, conselho_tutelar_id, cidade, estado, bairro } = denuncia;
 
     const result = await this.db.run(
-      `INSERT INTO denuncias (protocolo, regiao, profissao_id) 
-       VALUES (?, ?, ?)`,
-      [protocolo, regiao, profissao_id ?? null]
+      `INSERT INTO denuncias (
+        protocolo,
+        regiao,
+        profissao_id,
+        conselho_tutelar_id,
+        cidade,
+        estado,
+        bairro
+      )
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      [
+        protocolo,
+        regiao ?? '',
+        profissao_id ?? null,
+        conselho_tutelar_id ?? null,
+        cidade ?? null,
+        estado ?? null,
+        bairro ?? null,
+      ]
     );
 
     return result.lastID!
