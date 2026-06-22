@@ -17,6 +17,127 @@ const FORMULARIO_CAMPO_MAX_FOTOS_CHECK = `
             OR (tipo_campo != 'foto' AND max_fotos IS NULL)
           )
 `;
+const PROFISSAO_DATA_UPDATE_TRIGGERS_SQL = `
+      CREATE TRIGGER IF NOT EXISTS trg_documentos_profissao_data_update_insert
+      AFTER INSERT ON documentos
+      FOR EACH ROW
+      BEGIN
+        UPDATE profissao
+           SET data_update = datetime('now', '-3 hours')
+         WHERE id = NEW.profissao_id
+           AND data_delete IS NULL;
+      END;
+
+      CREATE TRIGGER IF NOT EXISTS trg_documentos_profissao_data_update_update
+      AFTER UPDATE ON documentos
+      FOR EACH ROW
+      BEGIN
+        UPDATE profissao
+           SET data_update = datetime('now', '-3 hours')
+         WHERE id IN (OLD.profissao_id, NEW.profissao_id)
+           AND data_delete IS NULL;
+      END;
+
+      CREATE TRIGGER IF NOT EXISTS trg_documentos_profissao_data_update_delete
+      AFTER DELETE ON documentos
+      FOR EACH ROW
+      BEGIN
+        UPDATE profissao
+           SET data_update = datetime('now', '-3 hours')
+         WHERE id = OLD.profissao_id
+           AND data_delete IS NULL;
+      END;
+
+      CREATE TRIGGER IF NOT EXISTS trg_formulario_passo_profissao_data_update_insert
+      AFTER INSERT ON formulario_passo
+      FOR EACH ROW
+      BEGIN
+        UPDATE profissao
+           SET data_update = datetime('now', '-3 hours')
+         WHERE id = NEW.profissao_id
+           AND data_delete IS NULL;
+      END;
+
+      CREATE TRIGGER IF NOT EXISTS trg_formulario_passo_profissao_data_update_update
+      AFTER UPDATE ON formulario_passo
+      FOR EACH ROW
+      BEGIN
+        UPDATE profissao
+           SET data_update = datetime('now', '-3 hours')
+         WHERE id IN (OLD.profissao_id, NEW.profissao_id)
+           AND data_delete IS NULL;
+      END;
+
+      CREATE TRIGGER IF NOT EXISTS trg_formulario_passo_profissao_data_update_delete
+      AFTER DELETE ON formulario_passo
+      FOR EACH ROW
+      BEGIN
+        UPDATE profissao
+           SET data_update = datetime('now', '-3 hours')
+         WHERE id = OLD.profissao_id
+           AND data_delete IS NULL;
+      END;
+
+      CREATE TRIGGER IF NOT EXISTS trg_formulario_campo_profissao_data_update_insert
+      AFTER INSERT ON formulario_campo
+      FOR EACH ROW
+      BEGIN
+        UPDATE profissao
+           SET data_update = datetime('now', '-3 hours')
+         WHERE id = (
+           SELECT profissao_id
+             FROM formulario_passo
+            WHERE id = NEW.formulario_passo_id
+         )
+           AND data_delete IS NULL;
+      END;
+
+      CREATE TRIGGER IF NOT EXISTS trg_formulario_campo_profissao_data_update_update
+      AFTER UPDATE ON formulario_campo
+      FOR EACH ROW
+      BEGIN
+        UPDATE profissao
+           SET data_update = datetime('now', '-3 hours')
+         WHERE id IN (
+           SELECT profissao_id
+             FROM formulario_passo
+            WHERE id = OLD.formulario_passo_id
+           UNION
+           SELECT profissao_id
+             FROM formulario_passo
+            WHERE id = NEW.formulario_passo_id
+         )
+           AND data_delete IS NULL;
+      END;
+
+      CREATE TRIGGER IF NOT EXISTS trg_formulario_campo_profissao_data_update_delete
+      AFTER DELETE ON formulario_campo
+      FOR EACH ROW
+      BEGIN
+        UPDATE profissao
+           SET data_update = datetime('now', '-3 hours')
+         WHERE id = (
+           SELECT profissao_id
+             FROM formulario_passo
+            WHERE id = OLD.formulario_passo_id
+         )
+           AND data_delete IS NULL;
+      END;
+`;
+const RECRIAR_DATA_UPDATE_TRIGGERS_SQL = `
+      DROP TRIGGER IF EXISTS trg_conselho_tutelar_data_update;
+      DROP TRIGGER IF EXISTS trg_formulario_passo_data_update;
+      DROP TRIGGER IF EXISTS trg_formulario_campo_data_update;
+      DROP TRIGGER IF EXISTS trg_documentos_profissao_data_update_insert;
+      DROP TRIGGER IF EXISTS trg_documentos_profissao_data_update_update;
+      DROP TRIGGER IF EXISTS trg_documentos_profissao_data_update_delete;
+      DROP TRIGGER IF EXISTS trg_formulario_passo_profissao_data_update_insert;
+      DROP TRIGGER IF EXISTS trg_formulario_passo_profissao_data_update_update;
+      DROP TRIGGER IF EXISTS trg_formulario_passo_profissao_data_update_delete;
+      DROP TRIGGER IF EXISTS trg_formulario_campo_profissao_data_update_insert;
+      DROP TRIGGER IF EXISTS trg_formulario_campo_profissao_data_update_update;
+      DROP TRIGGER IF EXISTS trg_formulario_campo_profissao_data_update_delete;
+`;
 
 type ColumnInfo = { name: string; notnull: number; type: string };
 type ForeignKeyInfo = { table: string; from: string; on_delete: string };
@@ -77,8 +198,8 @@ async function seedConselhosTutelares(db: Database): Promise<void> {
   const conselhos = (conselhosCgData as { conselhos: ConselhoSeed[] }).conselhos;
   for (const conselho of conselhos) {
     await db.run(
-      `INSERT INTO conselho_tutelar (nome, email, cidade, estado, bairros)
-       VALUES (?, ?, ?, ?, ?)`,
+      `INSERT INTO conselho_tutelar (nome, email, cidade, estado, bairros, data_criacao)
+       VALUES (?, ?, ?, ?, ?, datetime('now', '-3 hours'))`,
       conselho.nome,
       conselho.email,
       conselho.cidade,
@@ -93,6 +214,8 @@ async function runMigrations(db: Database) {
   await db.exec('BEGIN;');
 
   try {
+    await db.exec(RECRIAR_DATA_UPDATE_TRIGGERS_SQL);
+
     await db.exec(`
       CREATE TABLE IF NOT EXISTS profissao (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -100,7 +223,7 @@ async function runMigrations(db: Database) {
         descricao TEXT NOT NULL,
         cor TEXT NOT NULL,
         status INTEGER NOT NULL DEFAULT 1,
-        data_criacao DATETIME DEFAULT CURRENT_TIMESTAMP,
+        data_criacao DATETIME DEFAULT (datetime('now', '-3 hours')),
         data_update DATETIME,
         data_delete DATETIME
       );
@@ -110,9 +233,20 @@ async function runMigrations(db: Database) {
         usuario TEXT NOT NULL UNIQUE,
         senha_hash TEXT NOT NULL,
         refresh_token_hash TEXT,
-        data_criacao DATETIME DEFAULT CURRENT_TIMESTAMP,
+        data_criacao DATETIME DEFAULT (datetime('now', '-3 hours')),
         data_update DATETIME
       );
+
+      CREATE TABLE IF NOT EXISTS profissao_ultima_edicao (
+        profissao_id INTEGER PRIMARY KEY,
+        usuario_admin_id INTEGER NOT NULL,
+        data_edicao DATETIME NOT NULL DEFAULT (datetime('now', '-3 hours')),
+        FOREIGN KEY (profissao_id) REFERENCES profissao(id) ON DELETE CASCADE,
+        FOREIGN KEY (usuario_admin_id) REFERENCES usuario_admin(id)
+      );
+
+      CREATE INDEX IF NOT EXISTS idx_profissao_ultima_edicao_usuario_admin_id
+        ON profissao_ultima_edicao (usuario_admin_id);
 
       CREATE TABLE IF NOT EXISTS conselho_tutelar (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -121,7 +255,7 @@ async function runMigrations(db: Database) {
         cidade TEXT NOT NULL,
         estado TEXT NOT NULL,
         bairros TEXT NOT NULL,
-        data_criacao DATETIME DEFAULT CURRENT_TIMESTAMP,
+        data_criacao DATETIME DEFAULT (datetime('now', '-3 hours')),
         data_update DATETIME,
         UNIQUE (nome, cidade, estado)
       );
@@ -134,7 +268,7 @@ async function runMigrations(db: Database) {
       FOR EACH ROW
       BEGIN
         UPDATE conselho_tutelar
-           SET data_update = CURRENT_TIMESTAMP
+           SET data_update = datetime('now', '-3 hours')
          WHERE id = OLD.id;
       END;
 
@@ -147,8 +281,10 @@ async function runMigrations(db: Database) {
         pontos_foco TEXT,
         url_online TEXT,
         arquivo TEXT,
+        nome_do_arquivo TEXT NOT NULL DEFAULT '',
         foto_capa TEXT,
-        data_criacao DATETIME DEFAULT CURRENT_TIMESTAMP,
+        nome_do_arquivo_capa TEXT NOT NULL DEFAULT '',
+        data_criacao DATETIME DEFAULT (datetime('now', '-3 hours')),
         data_update DATETIME,
         FOREIGN KEY (profissao_id) REFERENCES profissao(id) ON DELETE CASCADE,
         CHECK (
@@ -167,7 +303,7 @@ async function runMigrations(db: Database) {
         ordem_index INTEGER NOT NULL,
         titulo TEXT NOT NULL,
         descricao TEXT,
-        data_criacao DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        data_criacao DATETIME NOT NULL DEFAULT (datetime('now', '-3 hours')),
         data_update DATETIME,
         FOREIGN KEY (profissao_id) REFERENCES profissao(id) ON DELETE CASCADE,
         UNIQUE (profissao_id, ordem_index)
@@ -185,7 +321,7 @@ async function runMigrations(db: Database) {
         max_fotos INTEGER,
         obrigatorio INTEGER NOT NULL DEFAULT 0 CHECK (obrigatorio IN (0, 1)),
         dica TEXT,
-        data_criacao DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        data_criacao DATETIME NOT NULL DEFAULT (datetime('now', '-3 hours')),
         data_update DATETIME,
         ${FORMULARIO_CAMPO_MAX_FOTOS_CHECK},
         FOREIGN KEY (formulario_passo_id) REFERENCES formulario_passo(id) ON DELETE CASCADE,
@@ -203,7 +339,7 @@ async function runMigrations(db: Database) {
       FOR EACH ROW
       BEGIN
         UPDATE formulario_passo
-           SET data_update = CURRENT_TIMESTAMP
+           SET data_update = datetime('now', '-3 hours')
          WHERE id = OLD.id;
       END;
 
@@ -212,9 +348,10 @@ async function runMigrations(db: Database) {
       FOR EACH ROW
       BEGIN
         UPDATE formulario_campo
-           SET data_update = CURRENT_TIMESTAMP
+           SET data_update = datetime('now', '-3 hours')
          WHERE id = OLD.id;
       END;
+      ${PROFISSAO_DATA_UPDATE_TRIGGERS_SQL}
     `);
 
     await seedConselhosTutelares(db);
@@ -229,7 +366,7 @@ async function runMigrations(db: Database) {
           descricao TEXT,
           cor TEXT NOT NULL,
           status INTEGER NOT NULL DEFAULT 1,
-          data_criacao DATETIME DEFAULT CURRENT_TIMESTAMP,
+          data_criacao DATETIME DEFAULT (datetime('now', '-3 hours')),
           data_update DATETIME,
           data_delete DATETIME
         );
@@ -242,6 +379,19 @@ async function runMigrations(db: Database) {
         ALTER TABLE profissao_new RENAME TO profissao;
       `);
     }
+
+    await db.exec(`
+      CREATE TABLE IF NOT EXISTS profissao_ultima_edicao (
+        profissao_id INTEGER PRIMARY KEY,
+        usuario_admin_id INTEGER NOT NULL,
+        data_edicao DATETIME NOT NULL DEFAULT (datetime('now', '-3 hours')),
+        FOREIGN KEY (profissao_id) REFERENCES profissao(id) ON DELETE CASCADE,
+        FOREIGN KEY (usuario_admin_id) REFERENCES usuario_admin(id)
+      );
+
+      CREATE INDEX IF NOT EXISTS idx_profissao_ultima_edicao_usuario_admin_id
+        ON profissao_ultima_edicao (usuario_admin_id);
+    `);
 
     const denunciasExists = await tableExists(db, 'denuncias');
     const hasProfissaoId = denunciasExists && await columnExists(db, 'denuncias', 'profissao_id');
@@ -271,7 +421,7 @@ async function runMigrations(db: Database) {
         CREATE TABLE IF NOT EXISTS denuncias_new (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
           protocolo TEXT NOT NULL UNIQUE,
-          data_criacao DATETIME DEFAULT CURRENT_TIMESTAMP,
+          data_criacao DATETIME DEFAULT (datetime('now', '-3 hours')),
           regiao TEXT NOT NULL,
           profissao_id INTEGER,
           conselho_tutelar_id INTEGER,
@@ -317,11 +467,23 @@ async function runMigrations(db: Database) {
       documentosExists &&
       await foreignKeyUsesOnDelete(db, 'documentos', 'profissao_id', 'profissao', 'CASCADE');
     const documentoTemOrdem = documentosExists && await columnExists(db, 'documentos', 'ordem_index');
+    const documentoTemNomeArquivo = documentosExists && await columnExists(db, 'documentos', 'nome_do_arquivo');
+    const documentoTemNomeArquivoCapa =
+      documentosExists && await columnExists(db, 'documentos', 'nome_do_arquivo_capa');
     const documentoTemUniqueOrdem =
       documentosExists &&
       await sqlContains(db, 'documentos', 'UNIQUE (profissao_id, ordem_index)');
 
-    if (documentosExists && (!documentoFkCascade || !documentoTemOrdem || !documentoTemUniqueOrdem)) {
+    if (
+      documentosExists &&
+      (
+        !documentoFkCascade ||
+        !documentoTemOrdem ||
+        !documentoTemNomeArquivo ||
+        !documentoTemNomeArquivoCapa ||
+        !documentoTemUniqueOrdem
+      )
+    ) {
       await db.exec(`
         CREATE TABLE IF NOT EXISTS documentos_new (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -332,8 +494,10 @@ async function runMigrations(db: Database) {
           pontos_foco TEXT,
           url_online TEXT,
           arquivo TEXT,
+          nome_do_arquivo TEXT NOT NULL DEFAULT '',
           foto_capa TEXT,
-          data_criacao DATETIME DEFAULT CURRENT_TIMESTAMP,
+          nome_do_arquivo_capa TEXT NOT NULL DEFAULT '',
+          data_criacao DATETIME DEFAULT (datetime('now', '-3 hours')),
           data_update DATETIME,
           FOREIGN KEY (profissao_id) REFERENCES profissao(id) ON DELETE CASCADE,
           CHECK (
@@ -352,7 +516,9 @@ async function runMigrations(db: Database) {
           pontos_foco,
           url_online,
           arquivo,
+          nome_do_arquivo,
           foto_capa,
+          nome_do_arquivo_capa,
           data_criacao,
           data_update
         )
@@ -370,7 +536,9 @@ async function runMigrations(db: Database) {
           pontos_foco,
           url_online,
           arquivo,
+          ${documentoTemNomeArquivo ? 'nome_do_arquivo' : "''"},
           foto_capa,
+          ${documentoTemNomeArquivoCapa ? 'nome_do_arquivo_capa' : "''"},
           data_criacao,
           data_update
           FROM documentos;
@@ -421,7 +589,7 @@ async function runMigrations(db: Database) {
           max_fotos INTEGER,
           obrigatorio INTEGER NOT NULL DEFAULT 0 CHECK (obrigatorio IN (0, 1)),
           dica TEXT,
-          data_criacao DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+          data_criacao DATETIME NOT NULL DEFAULT (datetime('now', '-3 hours')),
           data_update DATETIME,
           ${FORMULARIO_CAMPO_MAX_FOTOS_CHECK},
           FOREIGN KEY (formulario_passo_id) REFERENCES formulario_passo(id) ON DELETE CASCADE,
@@ -482,11 +650,13 @@ async function runMigrations(db: Database) {
         FOR EACH ROW
         BEGIN
           UPDATE formulario_campo
-             SET data_update = CURRENT_TIMESTAMP
+             SET data_update = datetime('now', '-3 hours')
            WHERE id = OLD.id;
         END;
       `);
     }
+
+    await db.exec(PROFISSAO_DATA_UPDATE_TRIGGERS_SQL);
 
     await db.exec('COMMIT;');
   } catch (error) {

@@ -9,7 +9,9 @@ type DocumentoPersistencia = {
   pontos_foco: string | null;
   url_online: string | null;
   arquivo: string | null;
+  nome_do_arquivo: string;
   foto_capa: string | null;
+  nome_do_arquivo_capa: string;
 };
 
 export class DocumentoRepository {
@@ -44,9 +46,12 @@ export class DocumentoRepository {
         pontos_foco,
         url_online,
         arquivo,
-        foto_capa
+        nome_do_arquivo,
+        foto_capa,
+        nome_do_arquivo_capa,
+        data_criacao
       )
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now', '-3 hours'))`,
       data.profissao_id,
       data.ordem_index,
       data.titulo,
@@ -54,7 +59,9 @@ export class DocumentoRepository {
       data.pontos_foco,
       data.url_online,
       data.arquivo,
-      data.foto_capa
+      data.nome_do_arquivo,
+      data.foto_capa,
+      data.nome_do_arquivo_capa
     );
 
     const criado = await this.buscarPorId(result.lastID!);
@@ -74,8 +81,10 @@ export class DocumentoRepository {
              pontos_foco = ?,
              url_online = ?,
              arquivo = ?,
+             nome_do_arquivo = ?,
              foto_capa = ?,
-             data_update = CURRENT_TIMESTAMP
+             nome_do_arquivo_capa = ?,
+             data_update = datetime('now', '-3 hours')
       WHERE id = ?`,
       data.profissao_id,
       data.ordem_index,
@@ -84,7 +93,9 @@ export class DocumentoRepository {
       data.pontos_foco,
       data.url_online,
       data.arquivo,
+      data.nome_do_arquivo,
       data.foto_capa,
+      data.nome_do_arquivo_capa,
       id
     );
 
@@ -137,7 +148,7 @@ export class DocumentoRepository {
         await this.db.run(
           `UPDATE documentos
               SET ordem_index = ?,
-                  data_update = CURRENT_TIMESTAMP
+                  data_update = datetime('now', '-3 hours')
             WHERE id = ? AND profissao_id = ?`,
           item.ordem_index,
           item.id,

@@ -20,7 +20,8 @@ export class UsuarioAdminRepository {
 
   async create(usuario: string, senhaHash: string): Promise<UsuarioAdmin> {
     const result = await this.db.run(
-      `INSERT INTO usuario_admin (usuario, senha_hash) VALUES (?, ?)`,
+      `INSERT INTO usuario_admin (usuario, senha_hash, data_criacao)
+       VALUES (?, ?, datetime('now', '-3 hours'))`,
       usuario,
       senhaHash
     );
@@ -32,7 +33,7 @@ export class UsuarioAdminRepository {
 
   async updateRefreshTokenHash(id: number, refreshHash: string | null) {
     await this.db.run(
-      `UPDATE usuario_admin SET refresh_token_hash = ?, data_update = CURRENT_TIMESTAMP WHERE id = ?`,
+      `UPDATE usuario_admin SET refresh_token_hash = ?, data_update = datetime('now', '-3 hours') WHERE id = ?`,
       refreshHash,
       id
     );
@@ -41,7 +42,7 @@ export class UsuarioAdminRepository {
   async updatePasswordAndResetRefresh(id: number, senhaHash: string) {
     await this.db.run(
       `UPDATE usuario_admin 
-         SET senha_hash = ?, refresh_token_hash = NULL, data_update = CURRENT_TIMESTAMP 
+         SET senha_hash = ?, refresh_token_hash = NULL, data_update = datetime('now', '-3 hours') 
        WHERE id = ?`,
       senhaHash,
       id

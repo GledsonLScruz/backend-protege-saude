@@ -20,6 +20,8 @@ const extrairArquivos = (req: Request): DocumentoUploadFiles => {
   };
 };
 
+const obterUsuarioAdminId = (req: Request): number | undefined => req.usuarioAutenticado?.id;
+
 const statusPorErro = (message: string): number => {
   if (message.includes('não encontrada') || message.includes('não encontrado')) return 404;
   if (message.includes('já utilizado') || message.includes('duplicado')) return 409;
@@ -74,10 +76,12 @@ export const buscarDocumentoPorId = async (req: Request, res: Response) => {
 export const criarDocumento = async (req: Request, res: Response) => {
   const service = await DocumentoService();
   const files = extrairArquivos(req);
+  const usuarioAdminId = obterUsuarioAdminId(req);
+  if (!usuarioAdminId) return res.status(401).json({ error: 'Usuário autenticado inválido' });
 
   try {
     const dto = CriarDocumentoRequest.from(req.body);
-    const documento = await service.criar(dto, files);
+    const documento = await service.criar(dto, files, usuarioAdminId);
     return res.status(201).json(documento);
   } catch (error: any) {
     const message = error?.message || 'Erro ao criar documento';
@@ -89,14 +93,16 @@ export const atualizarDocumento = async (req: Request, res: Response) => {
   const service = await DocumentoService();
   const id = Number(req.params.id);
   const files = extrairArquivos(req);
+  const usuarioAdminId = obterUsuarioAdminId(req);
 
   if (Number.isNaN(id)) {
     return res.status(400).json({ error: 'ID inválido' });
   }
+  if (!usuarioAdminId) return res.status(401).json({ error: 'Usuário autenticado inválido' });
 
   try {
     const dto = AtualizarDocumentoRequest.from(req.body);
-    const documento = await service.atualizar(id, dto, files);
+    const documento = await service.atualizar(id, dto, files, usuarioAdminId);
     return res.status(200).json(documento);
   } catch (error: any) {
     const message = error?.message || 'Erro ao atualizar documento';
@@ -107,13 +113,15 @@ export const atualizarDocumento = async (req: Request, res: Response) => {
 export const removerDocumento = async (req: Request, res: Response) => {
   const service = await DocumentoService();
   const id = Number(req.params.id);
+  const usuarioAdminId = obterUsuarioAdminId(req);
 
   if (Number.isNaN(id)) {
     return res.status(400).json({ error: 'ID inválido' });
   }
+  if (!usuarioAdminId) return res.status(401).json({ error: 'Usuário autenticado inválido' });
 
   try {
-    await service.deletar(id);
+    await service.deletar(id, usuarioAdminId);
     return res.status(200).json({ message: 'Documento removido com sucesso' });
   } catch (error: any) {
     const message = error?.message || 'Erro ao remover documento';
@@ -123,10 +131,12 @@ export const removerDocumento = async (req: Request, res: Response) => {
 
 export const reorderDocumentos = async (req: Request, res: Response) => {
   const service = await DocumentoService();
+  const usuarioAdminId = obterUsuarioAdminId(req);
+  if (!usuarioAdminId) return res.status(401).json({ error: 'Usuário autenticado inválido' });
 
   try {
     const dto = ReorderDocumentoRequest.from(req.body);
-    const documentos = await service.reorder(dto);
+    const documentos = await service.reorder(dto, usuarioAdminId);
     return res.status(200).json(documentos);
   } catch (error: any) {
     const message = error?.message || 'Erro ao reordenar documentos';

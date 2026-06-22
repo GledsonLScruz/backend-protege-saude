@@ -16,6 +16,7 @@ import {
   montarCaminhosFotoCapa,
   removerArquivoSeExistir,
 } from './documento-file-utils';
+import { ProfissaoRepository } from '../profissao/profissao-repository';
 
 const validarIdPositivo = (id: number, nomeCampo: string) => {
   if (!Number.isInteger(id) || id <= 0) {
@@ -34,6 +35,8 @@ const paraTextoOpcionalNulo = (value: string | undefined | null): string | null 
   const texto = value.trim();
   return texto.length ? texto : null;
 };
+
+const obterNomeOriginal = (arquivo?: Express.Multer.File): string => arquivo?.originalname ?? '';
 
 const validarUrlOnline = (url: string) => {
   let parsed: URL;
@@ -98,6 +101,7 @@ export const DocumentoService = async () => {
   garantirDiretoriosDocumento();
   const database = await db;
   const repo = new DocumentoRepository(database);
+  const profissaoRepo = new ProfissaoRepository(database);
 
   const listarPorProfissao = async (profissaoId: number): Promise<Documento[]> => {
     validarIdPositivo(profissaoId, 'Profissão');
@@ -115,7 +119,11 @@ export const DocumentoService = async () => {
     return documento;
   };
 
-  const criar = async (payload: CriarDocumentoDTO, files: DocumentoUploadFiles): Promise<Documento> => {
+  const criar = async (
+    payload: CriarDocumentoDTO,
+    files: DocumentoUploadFiles,
+    usuarioAdminId: number
+  ): Promise<Documento> => {
     validarIdPositivo(payload.profissao_id, 'Profissão');
 
     const titulo = payload.titulo?.trim();
@@ -150,11 +158,16 @@ export const DocumentoService = async () => {
       pontos_foco: paraTextoOpcionalNulo(payload.pontos_foco),
       url_online: urlOnline,
       arquivo: files.arquivo ? '__upload_pendente__' : null,
+      nome_do_arquivo: obterNomeOriginal(files.arquivo),
       foto_capa: null,
+      nome_do_arquivo_capa: obterNomeOriginal(files.foto_capa),
     });
 
     if (!documento.id) return documento;
-    if (!files.arquivo && !files.foto_capa) return documento;
+    if (!files.arquivo && !files.foto_capa) {
+      await profissaoRepo.registrarUltimoEditor(payload.profissao_id, usuarioAdminId);
+      return documento;
+    }
 
     const novosArquivos: string[] = [];
     try {
@@ -183,11 +196,14 @@ export const DocumentoService = async () => {
         pontos_foco: paraTextoOpcionalNulo(payload.pontos_foco),
         url_online: urlOnline,
         arquivo: arquivoPath,
+        nome_do_arquivo: obterNomeOriginal(files.arquivo),
         foto_capa: fotoCapaPath,
+        nome_do_arquivo_capa: obterNomeOriginal(files.foto_capa),
       });
 
       if (!atualizado) throw new Error('Documento não encontrado');
       documento = atualizado;
+      await profissaoRepo.registrarUltimoEditor(payload.profissao_id, usuarioAdminId);
       return documento;
     } catch (error) {
       if (documento.id) {
@@ -201,7 +217,8 @@ export const DocumentoService = async () => {
   const atualizar = async (
     id: number,
     payload: AtualizarDocumentoDTO,
-    files: DocumentoUploadFiles
+    files: DocumentoUploadFiles,
+    usuarioAdminId: number
   ): Promise<Documento> => {
     validarIdPositivo(id, 'ID');
 
@@ -253,15 +270,23 @@ export const DocumentoService = async () => {
     try {
       let arquivoPath = atual.arquivo ?? null;
       let fotoCapaPath = atual.foto_capa ?? null;
+      let nomeDoArquivo = atual.nome_do_arquivo ?? '';
+      let nomeDoArquivoCapa = atual.nome_do_arquivo_capa ?? '';
 
-      if (payload.remover_arquivo && arquivoPath) {
-        arquivosAntigosParaRemocao.push(caminhoPublicoParaAbsoluto(arquivoPath));
+      if (payload.remover_arquivo) {
+        if (arquivoPath) {
+          arquivosAntigosParaRemocao.push(caminhoPublicoParaAbsoluto(arquivoPath));
+        }
         arquivoPath = null;
+        nomeDoArquivo = '';
       }
 
-      if (payload.remover_foto_capa && fotoCapaPath) {
-        arquivosAntigosParaRemocao.push(caminhoPublicoParaAbsoluto(fotoCapaPath));
+      if (payload.remover_foto_capa) {
+        if (fotoCapaPath) {
+          arquivosAntigosParaRemocao.push(caminhoPublicoParaAbsoluto(fotoCapaPath));
+        }
         fotoCapaPath = null;
+        nomeDoArquivoCapa = '';
       }
 
       if (files.arquivo) {
@@ -273,6 +298,7 @@ export const DocumentoService = async () => {
           arquivosAntigosParaRemocao.push(caminhoPublicoParaAbsoluto(arquivoPath));
         }
         arquivoPath = caminho.caminhoPublico;
+        nomeDoArquivo = obterNomeOriginal(files.arquivo);
       }
 
       if (files.foto_capa) {
@@ -284,6 +310,7 @@ export const DocumentoService = async () => {
           arquivosAntigosParaRemocao.push(caminhoPublicoParaAbsoluto(fotoCapaPath));
         }
         fotoCapaPath = caminho.caminhoPublico;
+        nomeDoArquivoCapa = obterNomeOriginal(files.foto_capa);
       }
 
       const possuiArquivo = Boolean(arquivoPath && arquivoPath.trim().length);
@@ -299,10 +326,17 @@ export const DocumentoService = async () => {
         pontos_foco: pontosFoco,
         url_online: urlOnline,
         arquivo: arquivoPath,
+        nome_do_arquivo: nomeDoArquivo,
         foto_capa: fotoCapaPath,
+        nome_do_arquivo_capa: nomeDoArquivoCapa,
       });
 
       if (!atualizado) throw new Error('Documento não encontrado');
+
+      await profissaoRepo.registrarUltimoEditor(profissaoId, usuarioAdminId);
+      if (atual.profissao_id !== profissaoId) {
+        await profissaoRepo.registrarUltimoEditor(atual.profissao_id, usuarioAdminId);
+      }
 
       await Promise.all(
         arquivosAntigosParaRemocao.map((filePath) => removerArquivoSeExistir(filePath))
@@ -315,7 +349,7 @@ export const DocumentoService = async () => {
     }
   };
 
-  const deletar = async (id: number): Promise<void> => {
+  const deletar = async (id: number, usuarioAdminId: number): Promise<void> => {
     validarIdPositivo(id, 'ID');
 
     const documento = await repo.buscarPorId(id);
@@ -323,6 +357,7 @@ export const DocumentoService = async () => {
 
     const removido = await repo.deletar(id);
     if (!removido) throw new Error('Documento não encontrado');
+    await profissaoRepo.registrarUltimoEditor(documento.profissao_id, usuarioAdminId);
 
     const arquivos = [documento.arquivo, documento.foto_capa].filter(
       (value): value is string => Boolean(value)
@@ -333,7 +368,7 @@ export const DocumentoService = async () => {
     );
   };
 
-  const reorder = async (payload: ReorderDocumentoDTO): Promise<Documento[]> => {
+  const reorder = async (payload: ReorderDocumentoDTO, usuarioAdminId: number): Promise<Documento[]> => {
     validarIdPositivo(payload.profissao_id, 'Profissão');
     normalizarItensReorder(payload.itens);
 
@@ -349,6 +384,7 @@ export const DocumentoService = async () => {
     }
 
     await repo.reorder(payload.profissao_id, payload.itens);
+    await profissaoRepo.registrarUltimoEditor(payload.profissao_id, usuarioAdminId);
     return repo.listarPorProfissao(payload.profissao_id);
   };
 

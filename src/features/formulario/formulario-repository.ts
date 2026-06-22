@@ -81,6 +81,26 @@ export class FormularioRepository {
     return this.db.get<FormularioPasso>(`SELECT * FROM formulario_passo WHERE id = ?`, id);
   }
 
+  async buscarProfissaoIdPorPassoId(passoId: number): Promise<number | undefined> {
+    const row = await this.db.get<{ profissao_id: number }>(
+      `SELECT profissao_id FROM formulario_passo WHERE id = ?`,
+      passoId
+    );
+    return row?.profissao_id;
+  }
+
+  async buscarProfissaoIdPorCampoId(campoId: number): Promise<number | undefined> {
+    const row = await this.db.get<{ profissao_id: number }>(
+      `SELECT fp.profissao_id
+         FROM formulario_campo fc
+         INNER JOIN formulario_passo fp
+           ON fp.id = fc.formulario_passo_id
+        WHERE fc.id = ?`,
+      campoId
+    );
+    return row?.profissao_id;
+  }
+
   async listarPassosPorProfissao(profissaoId: number): Promise<FormularioPasso[]> {
     return this.db.all<FormularioPasso[]>(
       `SELECT * FROM formulario_passo WHERE profissao_id = ? ORDER BY ordem_index ASC`,
@@ -111,8 +131,8 @@ export class FormularioRepository {
 
   async criarPasso(data: FormularioPassoPersistencia): Promise<FormularioPasso> {
     const result = await this.db.run(
-      `INSERT INTO formulario_passo (profissao_id, ordem_index, titulo, descricao)
-       VALUES (?, ?, ?, ?)`,
+      `INSERT INTO formulario_passo (profissao_id, ordem_index, titulo, descricao, data_criacao)
+       VALUES (?, ?, ?, ?, datetime('now', '-3 hours'))`,
       data.profissao_id,
       data.ordem_index,
       data.titulo,
@@ -133,7 +153,7 @@ export class FormularioRepository {
               ordem_index = ?,
               titulo = ?,
               descricao = ?,
-              data_update = CURRENT_TIMESTAMP
+              data_update = datetime('now', '-3 hours')
         WHERE id = ?`,
       data.profissao_id,
       data.ordem_index,
@@ -170,7 +190,7 @@ export class FormularioRepository {
         await this.db.run(
           `UPDATE formulario_passo
               SET ordem_index = ?,
-                  data_update = CURRENT_TIMESTAMP
+                  data_update = datetime('now', '-3 hours')
             WHERE id = ? AND profissao_id = ?`,
           item.ordem_index,
           item.id,
@@ -229,9 +249,10 @@ export class FormularioRepository {
          opcoes,
          max_fotos,
          obrigatorio,
-         dica
+         dica,
+         data_criacao
        )
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, datetime('now', '-3 hours'))`,
       data.formulario_passo_id,
       data.ordem_index,
       data.nome,
@@ -260,7 +281,7 @@ export class FormularioRepository {
               max_fotos = ?,
               obrigatorio = ?,
               dica = ?,
-              data_update = CURRENT_TIMESTAMP
+              data_update = datetime('now', '-3 hours')
         WHERE id = ?`,
       data.formulario_passo_id,
       data.ordem_index,
@@ -301,7 +322,7 @@ export class FormularioRepository {
         await this.db.run(
           `UPDATE formulario_campo
               SET ordem_index = ?,
-                  data_update = CURRENT_TIMESTAMP
+                  data_update = datetime('now', '-3 hours')
             WHERE id = ? AND formulario_passo_id = ?`,
           item.ordem_index,
           item.id,

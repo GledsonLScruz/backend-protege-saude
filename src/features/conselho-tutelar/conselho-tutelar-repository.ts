@@ -72,8 +72,8 @@ export class ConselhoTutelarRepository {
 
   async criar(data: CriarConselhoTutelarDTO): Promise<ConselhoTutelar> {
     const result = await this.db.run(
-      `INSERT INTO conselho_tutelar (nome, email, cidade, estado, bairros)
-       VALUES (?, ?, ?, ?, ?)`,
+      `INSERT INTO conselho_tutelar (nome, email, cidade, estado, bairros, data_criacao)
+       VALUES (?, ?, ?, ?, ?, datetime('now', '-3 hours'))`,
       data.nome,
       data.email,
       data.cidade,

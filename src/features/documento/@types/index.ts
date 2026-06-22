@@ -7,7 +7,9 @@ export type Documento = {
   pontos_foco?: string | null;
   url_online?: string | null;
   arquivo?: string | null;
+  nome_do_arquivo: string;
   foto_capa?: string | null;
+  nome_do_arquivo_capa: string;
   data_criacao?: string;
   data_update?: string | null;
 };

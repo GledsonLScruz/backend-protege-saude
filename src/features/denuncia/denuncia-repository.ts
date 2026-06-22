@@ -20,9 +20,10 @@ export class DenunciaRepository {
         conselho_tutelar_id,
         cidade,
         estado,
-        bairro
+        bairro,
+        data_criacao
       )
-       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+       VALUES (?, ?, ?, ?, ?, ?, ?, datetime('now', '-3 hours'))`,
       [
         protocolo,
         regiao ?? '',

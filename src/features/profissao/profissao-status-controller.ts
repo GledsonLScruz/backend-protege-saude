@@ -5,10 +5,12 @@ export const alterarStatusProfissao = async (req: Request, res: Response) => {
   const service = await ProfissaoService();
   const id = Number(req.params.id);
   if (Number.isNaN(id)) return res.status(400).json({ error: 'ID inválido' });
+  const usuarioAdminId = req.usuarioAutenticado?.id;
+  if (!usuarioAdminId) return res.status(401).json({ error: 'Usuário autenticado inválido' });
 
   const { status } = req.body;
   try {
-    const atualizada = await service.alterarStatus(id, status);
+    const atualizada = await service.alterarStatus(id, status, usuarioAdminId);
     return res.json(atualizada);
   } catch (error: any) {
     const message = error?.message || 'Erro ao alterar status';

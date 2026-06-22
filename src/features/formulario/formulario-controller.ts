@@ -9,6 +9,8 @@ import {
 } from './dto';
 import { FormularioService } from './formulario-service';
 
+const obterUsuarioAdminId = (req: Request): number | undefined => req.usuarioAutenticado?.id;
+
 const statusPorErro = (message: string): number => {
   if (message.includes('não encontrada') || message.includes('não encontrado')) return 404;
   if (message.includes('já utilizado') || message.includes('duplicado')) return 409;
@@ -62,10 +64,12 @@ export const obterFormularioPublicoPorProfissao = async (req: Request, res: Resp
 
 export const criarPassoFormulario = async (req: Request, res: Response) => {
   const service = await FormularioService();
+  const usuarioAdminId = obterUsuarioAdminId(req);
+  if (!usuarioAdminId) return res.status(401).json({ error: 'Usuário autenticado inválido' });
 
   try {
     const dto = CriarFormularioPassoRequest.from(req.body, req.params.profissaoId);
-    const passo = await service.criarPasso(dto);
+    const passo = await service.criarPasso(dto, usuarioAdminId);
     return res.status(201).json(passo);
   } catch (error: any) {
     const message = error?.message || 'Erro ao criar passo do formulário';
@@ -76,14 +80,16 @@ export const criarPassoFormulario = async (req: Request, res: Response) => {
 export const atualizarPassoFormulario = async (req: Request, res: Response) => {
   const service = await FormularioService();
   const id = Number(req.params.id);
+  const usuarioAdminId = obterUsuarioAdminId(req);
 
   if (Number.isNaN(id)) {
     return res.status(400).json({ error: 'ID inválido' });
   }
+  if (!usuarioAdminId) return res.status(401).json({ error: 'Usuário autenticado inválido' });
 
   try {
     const dto = AtualizarFormularioPassoRequest.from(req.body);
-    const passo = await service.atualizarPasso(id, dto);
+    const passo = await service.atualizarPasso(id, dto, usuarioAdminId);
     return res.status(200).json(passo);
   } catch (error: any) {
     const message = error?.message || 'Erro ao atualizar passo do formulário';
@@ -94,13 +100,15 @@ export const atualizarPassoFormulario = async (req: Request, res: Response) => {
 export const removerPassoFormulario = async (req: Request, res: Response) => {
   const service = await FormularioService();
   const id = Number(req.params.id);
+  const usuarioAdminId = obterUsuarioAdminId(req);
 
   if (Number.isNaN(id)) {
     return res.status(400).json({ error: 'ID inválido' });
   }
+  if (!usuarioAdminId) return res.status(401).json({ error: 'Usuário autenticado inválido' });
 
   try {
-    await service.deletarPasso(id);
+    await service.deletarPasso(id, usuarioAdminId);
     return res.status(200).json({ message: 'Passo removido com sucesso' });
   } catch (error: any) {
     const message = error?.message || 'Erro ao remover passo do formulário';
@@ -110,10 +118,12 @@ export const removerPassoFormulario = async (req: Request, res: Response) => {
 
 export const reorderPassosFormulario = async (req: Request, res: Response) => {
   const service = await FormularioService();
+  const usuarioAdminId = obterUsuarioAdminId(req);
+  if (!usuarioAdminId) return res.status(401).json({ error: 'Usuário autenticado inválido' });
 
   try {
     const dto = ReorderFormularioPassoRequest.from(req.body);
-    const passos = await service.reorderPassos(dto);
+    const passos = await service.reorderPassos(dto, usuarioAdminId);
     return res.status(200).json(passos);
   } catch (error: any) {
     const message = error?.message || 'Erro ao reordenar passos do formulário';
@@ -152,10 +162,12 @@ export const listarTiposCampoFormulario = async (_req: Request, res: Response) =
 
 export const criarCampoFormulario = async (req: Request, res: Response) => {
   const service = await FormularioService();
+  const usuarioAdminId = obterUsuarioAdminId(req);
+  if (!usuarioAdminId) return res.status(401).json({ error: 'Usuário autenticado inválido' });
 
   try {
     const dto = CriarFormularioCampoRequest.from(req.body, req.params.passoId);
-    const campo = await service.criarCampo(dto);
+    const campo = await service.criarCampo(dto, usuarioAdminId);
     return res.status(201).json(campo);
   } catch (error: any) {
     const message = error?.message || 'Erro ao criar campo do formulário';
@@ -166,14 +178,16 @@ export const criarCampoFormulario = async (req: Request, res: Response) => {
 export const atualizarCampoFormulario = async (req: Request, res: Response) => {
   const service = await FormularioService();
   const id = Number(req.params.id);
+  const usuarioAdminId = obterUsuarioAdminId(req);
 
   if (Number.isNaN(id)) {
     return res.status(400).json({ error: 'ID inválido' });
   }
+  if (!usuarioAdminId) return res.status(401).json({ error: 'Usuário autenticado inválido' });
 
   try {
     const dto = AtualizarFormularioCampoRequest.from(req.body);
-    const campo = await service.atualizarCampo(id, dto);
+    const campo = await service.atualizarCampo(id, dto, usuarioAdminId);
     return res.status(200).json(campo);
   } catch (error: any) {
     const message = error?.message || 'Erro ao atualizar campo do formulário';
@@ -184,13 +198,15 @@ export const atualizarCampoFormulario = async (req: Request, res: Response) => {
 export const removerCampoFormulario = async (req: Request, res: Response) => {
   const service = await FormularioService();
   const id = Number(req.params.id);
+  const usuarioAdminId = obterUsuarioAdminId(req);
 
   if (Number.isNaN(id)) {
     return res.status(400).json({ error: 'ID inválido' });
   }
+  if (!usuarioAdminId) return res.status(401).json({ error: 'Usuário autenticado inválido' });
 
   try {
-    await service.deletarCampo(id);
+    await service.deletarCampo(id, usuarioAdminId);
     return res.status(200).json({ message: 'Campo removido com sucesso' });
   } catch (error: any) {
     const message = error?.message || 'Erro ao remover campo do formulário';
@@ -200,10 +216,12 @@ export const removerCampoFormulario = async (req: Request, res: Response) => {
 
 export const reorderCamposFormulario = async (req: Request, res: Response) => {
   const service = await FormularioService();
+  const usuarioAdminId = obterUsuarioAdminId(req);
+  if (!usuarioAdminId) return res.status(401).json({ error: 'Usuário autenticado inválido' });
 
   try {
     const dto = ReorderFormularioCampoRequest.from(req.body);
-    const campos = await service.reorderCampos(dto);
+    const campos = await service.reorderCampos(dto, usuarioAdminId);
     return res.status(200).json(campos);
   } catch (error: any) {
     const message = error?.message || 'Erro ao reordenar campos do formulário';

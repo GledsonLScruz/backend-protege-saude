@@ -88,13 +88,10 @@ const validarRegraOpcoes = (tipoCampo: TipoCampo, opcoes: OpcaoCampo[] | null) =
   }
 
   if (tipoCampo === 'switch') {
-    if (opcoes !== null && opcoes.length === 0) {
-      throw new Error('opcoes deve conter ao menos um item para tipo_campo switch');
-    }
     return;
   }
 
-  if (opcoes !== null) {
+  if (opcoes !== null && opcoes?.length > 0) {
     throw new Error(
       `opcoes só é permitida para tipo_campo ${[...TIPOS_CAMPO_COM_OPCOES_OBRIGATORIAS, 'switch'].join(', ')}`
     );
@@ -182,7 +179,7 @@ export const FormularioService = async () => {
     return repo.listarPassosPorProfissao(profissaoId);
   };
 
-  const criarPasso = async (payload: CriarFormularioPassoDTO): Promise<FormularioPasso> => {
+  const criarPasso = async (payload: CriarFormularioPassoDTO, usuarioAdminId: number): Promise<FormularioPasso> => {
     validarIdPositivo(payload.profissao_id, 'Profissão');
 
     const titulo = payload.titulo?.trim();
@@ -199,15 +196,22 @@ export const FormularioService = async () => {
       throw new Error('ordem_index já utilizado para essa profissão');
     }
 
-    return repo.criarPasso({
+    const passo = await repo.criarPasso({
       profissao_id: payload.profissao_id,
       ordem_index: ordemIndex,
       titulo,
       descricao: normalizarTextoOpcional(payload.descricao),
     });
+
+    await profissaoRepo.registrarUltimoEditor(payload.profissao_id, usuarioAdminId);
+    return passo;
   };
 
-  const atualizarPasso = async (id: number, payload: AtualizarFormularioPassoDTO): Promise<FormularioPasso> => {
+  const atualizarPasso = async (
+    id: number,
+    payload: AtualizarFormularioPassoDTO,
+    usuarioAdminId: number
+  ): Promise<FormularioPasso> => {
     validarIdPositivo(id, 'ID');
 
     const atual = await repo.buscarPassoPorId(id);
@@ -232,16 +236,24 @@ export const FormularioService = async () => {
     });
 
     if (!updated) throw new Error('Passo não encontrado');
+    await profissaoRepo.registrarUltimoEditor(atual.profissao_id, usuarioAdminId);
     return updated;
   };
 
-  const deletarPasso = async (id: number): Promise<void> => {
+  const deletarPasso = async (id: number, usuarioAdminId: number): Promise<void> => {
     validarIdPositivo(id, 'ID');
+    const atual = await repo.buscarPassoPorId(id);
+    if (!atual) throw new Error('Passo não encontrado');
+
     const deleted = await repo.deletarPasso(id);
     if (!deleted) throw new Error('Passo não encontrado');
+    await profissaoRepo.registrarUltimoEditor(atual.profissao_id, usuarioAdminId);
   };
 
-  const reorderPassos = async (payload: ReorderFormularioPassoDTO): Promise<FormularioPasso[]> => {
+  const reorderPassos = async (
+    payload: ReorderFormularioPassoDTO,
+    usuarioAdminId: number
+  ): Promise<FormularioPasso[]> => {
     validarIdPositivo(payload.profissao_id, 'Profissão');
     normalizarItensReorder(payload.itens);
 
@@ -257,6 +269,7 @@ export const FormularioService = async () => {
     }
 
     await repo.reorderPassos(payload.profissao_id, payload.itens);
+    await profissaoRepo.registrarUltimoEditor(payload.profissao_id, usuarioAdminId);
     return repo.listarPassosPorProfissao(payload.profissao_id);
   };
 
@@ -310,7 +323,7 @@ export const FormularioService = async () => {
     };
   };
 
-  const criarCampo = async (payload: CriarFormularioCampoDTO): Promise<FormularioCampo> => {
+  const criarCampo = async (payload: CriarFormularioCampoDTO, usuarioAdminId: number): Promise<FormularioCampo> => {
     validarIdPositivo(payload.formulario_passo_id, 'Passo');
 
     const passoExiste = await repo.passoExiste(payload.formulario_passo_id);
@@ -334,7 +347,7 @@ export const FormularioService = async () => {
     validarRegraOpcoes(tipoCampo, opcoes);
     validarRegraMaxFotos(tipoCampo, maxFotos);
 
-    return repo.criarCampo({
+    const campo = await repo.criarCampo({
       formulario_passo_id: payload.formulario_passo_id,
       ordem_index: ordemIndex,
       nome,
@@ -344,9 +357,17 @@ export const FormularioService = async () => {
       obrigatorio: payload.obrigatorio ?? false,
       dica: normalizarTextoOpcional(payload.dica),
     });
+
+    const profissaoId = await repo.buscarProfissaoIdPorPassoId(payload.formulario_passo_id);
+    if (profissaoId) await profissaoRepo.registrarUltimoEditor(profissaoId, usuarioAdminId);
+    return campo;
   };
 
-  const atualizarCampo = async (id: number, payload: AtualizarFormularioCampoDTO): Promise<FormularioCampo> => {
+  const atualizarCampo = async (
+    id: number,
+    payload: AtualizarFormularioCampoDTO,
+    usuarioAdminId: number
+  ): Promise<FormularioCampo> => {
     validarIdPositivo(id, 'ID');
 
     const atual = await repo.buscarCampoPorId(id);
@@ -382,16 +403,24 @@ export const FormularioService = async () => {
     });
 
     if (!updated) throw new Error('Campo não encontrado');
+    const profissaoId = await repo.buscarProfissaoIdPorPassoId(atual.formulario_passo_id);
+    if (profissaoId) await profissaoRepo.registrarUltimoEditor(profissaoId, usuarioAdminId);
     return updated;
   };
 
-  const deletarCampo = async (id: number): Promise<void> => {
+  const deletarCampo = async (id: number, usuarioAdminId: number): Promise<void> => {
     validarIdPositivo(id, 'ID');
+    const profissaoId = await repo.buscarProfissaoIdPorCampoId(id);
+
     const deleted = await repo.deletarCampo(id);
     if (!deleted) throw new Error('Campo não encontrado');
+    if (profissaoId) await profissaoRepo.registrarUltimoEditor(profissaoId, usuarioAdminId);
   };
 
-  const reorderCampos = async (payload: ReorderFormularioCampoDTO): Promise<FormularioCampo[]> => {
+  const reorderCampos = async (
+    payload: ReorderFormularioCampoDTO,
+    usuarioAdminId: number
+  ): Promise<FormularioCampo[]> => {
     validarIdPositivo(payload.formulario_passo_id, 'Passo');
     normalizarItensReorder(payload.itens);
 
@@ -407,6 +436,8 @@ export const FormularioService = async () => {
     }
 
     await repo.reorderCampos(payload.formulario_passo_id, payload.itens);
+    const profissaoId = await repo.buscarProfissaoIdPorPassoId(payload.formulario_passo_id);
+    if (profissaoId) await profissaoRepo.registrarUltimoEditor(profissaoId, usuarioAdminId);
     return repo.listarCamposPorPasso(payload.formulario_passo_id);
   };
 
