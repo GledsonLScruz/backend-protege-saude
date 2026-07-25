@@ -204,13 +204,30 @@ export const DenunciaService = async () => {
       });
     }
 
+    let mailStart = 0;
+
     try {
+      mailStart = Date.now();
+      //logparaeficientedadenuncia
+      console.log('[denuncia] smtp_send_start', {
+        protocolo,
+        to: emailDestino,
+        attachmentBytes: body.pdf.size,
+      });
+
       const info = await transporter.sendMail({
         from: process.env.ODONTO_GUARDIAO_EMAIL,
         to: emailDestino,
         subject,
         text: emailBody,
         attachments,
+      });
+
+      //logparaeficientedadenuncia
+      console.log('[denuncia] smtp_send_done', {
+        protocolo,
+        durationMs: Date.now() - mailStart,
+        response: info.response,
       });
 
       await denunciaRepo.criar({
@@ -226,6 +243,14 @@ export const DenunciaService = async () => {
       console.log(`Email enviado: ${info.response}`);
       return { success: true, protocolo, message: 'Denúncia enviada com sucesso.' };
     } catch (error) {
+      //logparaeficientedadenuncia
+      console.error('[denuncia] smtp_send_error', {
+        protocolo,
+        durationMs: mailStart ? Date.now() - mailStart : null,
+        code: (error as any)?.code,
+        command: (error as any)?.command,
+        message: (error as any)?.message,
+      });
       console.error('Erro ao enviar denúncia:', error);
       throw formatarErroEnvioEmail(error);
     }

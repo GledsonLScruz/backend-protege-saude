@@ -26,6 +26,14 @@ export const criarDenuncia = async (req: Request, res: Response) => {
   const pdf = req.file;
   const profissaoId = Number(req.body?.profissao_id);
 
+  //logparaeficientedadenuncia
+  console.log('[denuncia] upload_received', {
+    fileName: pdf?.originalname,
+    mimeType: pdf?.mimetype,
+    sizeBytes: pdf?.size,
+    sizeMb: pdf ? (pdf.size / 1024 / 1024).toFixed(2) : null,
+  });
+
   if (!Number.isInteger(profissaoId) || profissaoId <= 0) {
     return res.status(400).json({ error: 'O campo "profissao_id" é obrigatório e deve ser válido.' });
   }
