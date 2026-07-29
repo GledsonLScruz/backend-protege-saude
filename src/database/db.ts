@@ -220,7 +220,7 @@ async function runMigrations(db: Database) {
       CREATE TABLE IF NOT EXISTS profissao (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         nome TEXT NOT NULL UNIQUE,
-        descricao TEXT NOT NULL,
+        descricao TEXT,
         cor TEXT NOT NULL,
         status INTEGER NOT NULL DEFAULT 1,
         data_criacao DATETIME DEFAULT (datetime('now', '-3 hours')),
@@ -351,7 +351,6 @@ async function runMigrations(db: Database) {
            SET data_update = datetime('now', '-3 hours')
          WHERE id = OLD.id;
       END;
-      ${PROFISSAO_DATA_UPDATE_TRIGGERS_SQL}
     `);
 
     await seedConselhosTutelares(db);
